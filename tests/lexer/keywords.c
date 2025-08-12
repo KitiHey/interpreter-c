@@ -1,0 +1,41 @@
+#include "test.h"
+#include "lexer.h"
+#include "tokens.h"
+#include <stdlib.h>
+
+static void testFunc(char* str, int idx, char* expected, tokenType_t expectedType, int* testNum) {
+		token_t *L = Lexer(str);
+		nequal(L, NULL) {
+				error(*testNum, "Returned NULL '%s'", str);
+				(*testNum)++;
+				return;
+		}
+		equal(L[idx].type, expectedType) {
+				error(*testNum, "Not the expected type: '%d'!='%d'", L[idx].type, expectedType);
+				goto terminate;
+		}
+		equal(L[idx].literal, expected) {
+				error(*testNum, "Not the expected: '%s'!='%s'", L[idx].literal, expected);
+				goto terminate;
+		}
+		success(*testNum, "Returned expected '%s'", expected);
+terminate:
+		free(L);
+		L=NULL;
+		(*testNum)++;
+}
+
+int main() {
+		int testNum = 0;
+		testFunc("func return=let", 0, "func", FUNC, &testNum);
+		testFunc("func return=let", 1, "return", RETURN, &testNum);
+		testFunc("func return=let", 2, "=", EQUAL, &testNum);
+		testFunc("func return(=let", 4, "let", LET, &testNum);
+		testFunc("func }return=let", 5, "EOF", TERMINATE, &testNum);
+		testFunc(";;yo", 1, ";", SEMICOLON, &testNum);
+		testFunc(";;yo", 2, "yo", IDENT, &testNum);
+		testFunc("\"Hello World!\"", 0, "Hello World!", STRING, &testNum);
+		testFunc(";=else", 2, "else", ELSE, &testNum);
+		testFunc(";=if", 2, "if", IF, &testNum);
+		return 0;
+}
