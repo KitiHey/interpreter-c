@@ -74,52 +74,48 @@ exprstmt_t* ParseExprStmt(token_t** Lexer, arena_t* Arena) {
 //		return Stmt;
 //}
 
-statements_t *ParseStatements(token_t** Lexer, arena_t* Arena) {
-	statements_t* Statement = ArenaPush(Arena, sizeof(statements_t));
-	if (Statement == NULL) { return NULL; }
-	switch (PEEK()) {
-			case TERMINATE:
-					free(Statement);
-					return NULL;
-			//case LET:
-			//		Statement->Stmt = LET_STMT;
-			//		Statement->letStmt = ParseLetStmt(Lexer, Arena);
-			default:
-					Statement->Stmt = EXPR_STMT;
-					Statement->exprStmt = ParseExprStmt(Lexer, Arena);
-	}
-	return Statement;
+statements_t *ParseStmt(token_t** Lexer, arena_t* Arena) {
+		statements_t* Statement = ArenaPush(Arena, sizeof(statements_t));
+		if (Statement == NULL) { return NULL; }
+		switch (PEEK()) {
+				case TERMINATE:
+						free(Statement);
+						return NULL;
+						//case LET:
+						//		Statement->Stmt = LET_STMT;
+						//		Statement->letStmt = ParseLetStmt(Lexer, Arena);
+				default:
+						Statement->Stmt = EXPR_STMT;
+						Statement->exprStmt = ParseExprStmt(Lexer, Arena);
+		}
+		return Statement;
+}
+
+stmts_t *ParseStatements(token_t** Lexer, arena_t* Arena) {
+		SKIPSEMI();
+		if (PEEK() == TERMINATE) {
+				return NULL;
+		};
+
+		stmts_t *Statements = ArenaPush(Arena,sizeof(stmts_t));
+		if (Statements == NULL) { 
+				ArenaFree(Arena);
+				return NULL;
+		}
+		Statements->Statement = ParseStmt(Lexer, Arena);
+		Statements->Next = ParseStatements(Lexer, Arena);
+
+		return Statements;
 }
 
 program_t Parser(token_t* Lexer) {
-	program_t Program = {NULL};
-	if (Lexer == NULL || Lexer[0].type == TERMINATE) return Program;
-	Program.Arena = ArenaCreate(1000000);
-	if (Program.Arena == NULL) return Program;
+		program_t Program = {NULL};
+		if (Lexer == NULL || Lexer[0].type == TERMINATE) return Program;
 
-	Program.Statements = malloc(2*sizeof(statements_t*));
-	if (Program.Statements == NULL) { 
-			ArenaFree(Program.Arena);
-			return Program; 
-	}
+		Program.Arena = ArenaCreate(ARENA_CAP);
+		if (Program.Arena == NULL) return Program;
 
-	size_t size = 2;
-	size_t idx = 0;
-	while ( (*Lexer).type != TERMINATE ) {
-			if (idx+1 >= size) {
-					size*=2;
-					Program.Statements = realloc(Program.Statements, size*sizeof(statements_t*));
-					if (Program.Statements == NULL) { 
-							ArenaFree(Program.Arena);
-							return Program;
-					}
-			}
-			if ((*Lexer).type == SEMICOLON) {
-					Lexer++;
-					continue;
-			}
-			Program.Statements[idx++] = ParseStatements(&Lexer, Program.Arena);
-	}
-	return Program;
+		Program.Statements = ParseStatements(&Lexer, Program.Arena);
+		if (Program.Statements == NULL) Program.Arena = NULL; 
+		return Program;
 }
-

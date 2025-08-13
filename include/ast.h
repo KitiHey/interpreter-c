@@ -5,6 +5,7 @@
 // Fundamentals
 typedef struct Statements statements_t;
 typedef struct Expressions expressions_t;
+typedef struct Stmts stmts_t;
 
 // Expressions
 typedef enum ExpressionsTypes {
@@ -105,8 +106,13 @@ typedef struct Statements {
 		statementsTypes_t Stmt;
 } statements_t;
 
+typedef struct Stmts {
+		statements_t* Statement;
+		stmts_t* Next;
+} stmts_t;
+
 // Program
 typedef struct Program {
 		arena_t* Arena;
-		statements_t** Statements; // * Statements[]
+		stmts_t* Statements; // * Statements[]
 } program_t;

@@ -1,7 +1,7 @@
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
-#define ARENA_CAP 1000000
+#define ARENA_CAP 1024*1024*4
 
 typedef struct Arena {
 	int64_t capacity;
