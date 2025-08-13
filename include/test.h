@@ -26,6 +26,7 @@ static inline bool cmpString(void* p1, void* p2) {
         const char*: cmpString, \
         default: cmpDefault)((void*)p1, (void*)p2)
 
+  #define iequal(p1, p2) if (p1==p2)
   #define equal(p1, p2) if (!areEqual(p1, p2))
   #define nequal(p1, p2) if (areEqual(p1, p2))
   #define error(subTestTime, string, ...) printf("\t\e[0;31;1mSubtest %d \e[0;31;2mDIDN'T\e[0;31;1m pass: " string "\e[0m\n", subTestTime, ##__VA_ARGS__)

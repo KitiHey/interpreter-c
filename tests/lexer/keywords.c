@@ -35,6 +35,7 @@ int main() {
 		testFunc(";;yo", 1, ";", SEMICOLON, &testNum);
 		testFunc(";;yo", 2, "yo", IDENT, &testNum);
 		testFunc("\"Hello World!\"", 0, "Hello World!", STRING, &testNum);
+		testFunc("\"Hello\" \"World!\"", 1, "World!", STRING, &testNum);
 		testFunc(";=else", 2, "else", ELSE, &testNum);
 		testFunc(";=if", 2, "if", IF, &testNum);
 		return 0;
