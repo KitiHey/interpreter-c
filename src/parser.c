@@ -11,9 +11,11 @@
 #define PEEK_LIT() (*Lexer)->literal
 #define CONSUME() ((*Lexer)++)
 #define SKIPSEMI() while (PEEK() == SEMICOLON) { CONSUME(); };
+#define MALLOC(size) ArenaPush(Arena, size)
+#define FREE(Arena) ArenaFree(Arena)
 
 integerexpr_t* ParseIntExpr(token_t** Lexer, arena_t* Arena) {
-		integerexpr_t* Expr = ArenaPush(Arena, sizeof(integerexpr_t));
+		integerexpr_t* Expr = MALLOC(sizeof(integerexpr_t));
 		if (Expr == NULL) return NULL;
 		Expr->Value = atoi(PEEK_LIT());
 		CONSUME();
@@ -21,11 +23,11 @@ integerexpr_t* ParseIntExpr(token_t** Lexer, arena_t* Arena) {
 }
 
 stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
-		stringexpr_t* Expr = ArenaPush(Arena, sizeof(stringexpr_t));
+		stringexpr_t* Expr = MALLOC(sizeof(stringexpr_t));
 		if (Expr == NULL) return NULL;
 
 		size_t len = strlen( PEEK_LIT() );
-		Expr->Value = ArenaPush(Arena, ( len+1 ) * sizeof(char*) );
+		Expr->Value = MALLOC(( len+1 ) * sizeof(char*) );
 		if (Expr->Value == NULL) { 
 				free(Expr);
 				return NULL;
@@ -40,7 +42,7 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 }
 
 expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena) {
-		expressions_t* Expression = ArenaPush(Arena, sizeof(expressions_t));
+		expressions_t* Expression = MALLOC(sizeof(expressions_t));
 		if (Expression == NULL) { return NULL; }
 		// Prefix
 		switch (PEEK()) {
@@ -61,7 +63,7 @@ expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena) {
 }
 
 exprstmt_t* ParseExprStmt(token_t** Lexer, arena_t* Arena) {
-		exprstmt_t* Stmt = ArenaPush(Arena, sizeof(statements_t));
+		exprstmt_t* Stmt = MALLOC(sizeof(statements_t));
 		if (Stmt == NULL) return NULL;
 		Stmt->Expr = ParseExpression(Lexer, Arena);
 		SKIPSEMI();
@@ -69,13 +71,13 @@ exprstmt_t* ParseExprStmt(token_t** Lexer, arena_t* Arena) {
 }
 
 //letstmt_t* ParseLetStmt(token_t** Lexer, arena_t* Arena) {
-//		letstmt_t* Stmt = ArenaPush(Arena, sizeof(letstmt_t));
+//		letstmt_t* Stmt = MALLOC(sizeof(letstmt_t));
 //		if (Stmt == NULL) return NULL;
 //		return Stmt;
 //}
 
 statements_t *ParseStmt(token_t** Lexer, arena_t* Arena) {
-		statements_t* Statement = ArenaPush(Arena, sizeof(statements_t));
+		statements_t* Statement = MALLOC(sizeof(statements_t));
 		if (Statement == NULL) { return NULL; }
 		switch (PEEK()) {
 				case TERMINATE:
@@ -97,9 +99,9 @@ stmts_t *ParseStatements(token_t** Lexer, arena_t* Arena) {
 				return NULL;
 		};
 
-		stmts_t *Statements = ArenaPush(Arena,sizeof(stmts_t));
+		stmts_t *Statements = MALLOC(sizeof(stmts_t));
 		if (Statements == NULL) { 
-				ArenaFree(Arena);
+				FREE(Arena);
 				return NULL;
 		}
 		Statements->Statement = ParseStmt(Lexer, Arena);
