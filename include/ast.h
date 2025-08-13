@@ -49,7 +49,7 @@ typedef struct InfixExpr {
 } infixexpr_t;
 
 typedef struct StringExpr {
-	char Value[];
+	char* Value;
 } stringexpr_t;
 
 typedef struct IntegerExpr {
@@ -79,7 +79,7 @@ typedef enum StatementsTypes {
 typedef struct FuncStmt {
 	statements_t** Block;
 	expressions_t** Condition;
-	char Ident[];
+	char* Ident;
 } funcstmt_t;
 
 typedef struct ExprStmt {
@@ -92,7 +92,7 @@ typedef struct ReturnStmt {
 
 typedef struct LetStmt {
 	expressions_t* Expr;
-	char Ident[];
+	char* Ident;
 } letstmt_t;
 
 typedef struct Statements {
