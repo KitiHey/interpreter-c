@@ -1,4 +1,6 @@
+#pragma once
 #include "tokens.h"
+#include "arena.h"
 
 // Fundamentals
 typedef struct Statements statements_t;
@@ -6,9 +8,11 @@ typedef struct Expressions expressions_t;
 
 // Expressions
 typedef enum ExpressionsTypes {
+	NONE_EXPR,
 	FUNC_EXPR,
 	STRING_EXPR,
-	MATH_EXPR,
+	INFIX_EXPR,
+	PREFIX_EXPR,
 	INTEGER_EXPR,
 	IF_EXPR,
 } expressionsTypes_t;
@@ -22,24 +26,30 @@ typedef enum Operators {
 } operators_t;
 
 typedef struct IfExpr {
-	expressions_t* Condition;
-	statements_t* Consequence;
-	statements_t* Alternative;
-} ifexpr_t
+	statements_t** Consequence;
+	statements_t** Alternative;
+	expressions_t** Condition;
+} ifexpr_t;
 
 typedef struct FuncExpr {
-	statements_t* Block;
-	expressions_t* Condition;
+	statements_t** Block;
+	expressions_t** Condition;
 } funcexpr_t;
 
-typedef struct MathExpr {
-	expressions_t Left;
+typedef struct PrefixExpr {
+	expressions_t* LeftExpr;
+	expressions_t* RightExpr;
 	operators_t Operator;
-	expressions_t Right;
-} mathexpr_t;
+} prefixexpr_t;
+
+typedef struct InfixExpr {
+	expressions_t* LeftExpr;
+	expressions_t* RightExpr;
+	operators_t Operator;
+} infixexpr_t;
 
 typedef struct StringExpr {
-	char* Value;
+	char Value[];
 } stringexpr_t;
 
 typedef struct IntegerExpr {
@@ -47,14 +57,15 @@ typedef struct IntegerExpr {
 } integerexpr_t;
 
 typedef struct Expressions {
-	expressionsTypes_t Expr;
 	union {
-			ifexpr_t ifExpr;
-			mathexpr_t mathExpr;
-			integerexpr_t integerExpr;
-			funcexpr_t funcExpr;
-			stringexpr_t stringExpr;
-	}
+			ifexpr_t *ifExpr;
+			infixexpr_t *infixExpr;
+			prefixexpr_t *prefixExpr;
+			integerexpr_t *integerExpr;
+			funcexpr_t *funcExpr;
+			stringexpr_t *stringExpr;
+	};
+	expressionsTypes_t Expr;
 } expressions_t;
 
 // Statements
@@ -66,35 +77,36 @@ typedef enum StatementsTypes {
 } statementsTypes_t;
 
 typedef struct FuncStmt {
-	char* Ident;
-	statements_t* Block;
-	expressions_t* Condition;
+	statements_t** Block;
+	expressions_t** Condition;
+	char Ident[];
 } funcstmt_t;
 
 typedef struct ExprStmt {
-	Expressions Expr;
+	expressions_t* Expr;
 } exprstmt_t;
 
 typedef struct ReturnStmt {
-	Expressions Expr;
+	expressions_t* Expr;
 } returnstmt_t;
 
 typedef struct LetStmt {
-	char* Ident;
-	Expressions Expr;
+	expressions_t* Expr;
+	char Ident[];
 } letstmt_t;
 
 typedef struct Statements {
-		statementsTypes_t Stmt;
 		union {
-				letstmt_t letStmt;
-				exprstmt_t exprStmt;
-				funcstmt_t funcStmt;
-				returnstmt_t returnStmt;	
+				letstmt_t *letStmt;
+				exprstmt_t *exprStmt;
+				funcstmt_t *funcStmt;
+				returnstmt_t *returnStmt;
 		};
+		statementsTypes_t Stmt;
 } statements_t;
 
 // Program
 typedef struct Program {
-		statements_t* statements;
+		arena_t* Arena;
+		statements_t** Statements; // * Statements[]
 } program_t;
