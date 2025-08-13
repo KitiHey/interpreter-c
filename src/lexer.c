@@ -73,6 +73,7 @@ token_t *Lexer(char* codeFile) {
 				peekEquals('(', L_PARENT, "(");
 				peekEquals(')', R_PARENT, ")");
 				peekEquals('{', L_BRACKET, "{");
+				peekEquals('!', BANG, "!");
 				peekEquals('}', R_BRACKET, "}");
 				peekEquals('[', L_BRACE, "[");
 				peekEquals(']', R_BRACE, "]");
@@ -101,7 +102,7 @@ token_t *Lexer(char* codeFile) {
 				}
 				
 #define P(arg) && !PeekIs(arg)
-				while (!PeekIs(';') P('=') P(' ') P('\0') P('+') P('-') P('*') P('/') P('(') P(')') P('{') P('}') P(']') P('[') ) {
+				while (!PeekIs(';') P('=') P('!') P(' ') P('\0') P('+') P('-') P('*') P('/') P('(') P(')') P('{') P('}') P(']') P('[') ) {
 #undef P
 						test(bool oldchar = foundChar);
 						foundChar = foundChar ? true: !Isdigit();
@@ -127,7 +128,7 @@ token_t *Lexer(char* codeFile) {
 				buffEquals("if", IF);
 				buffEquals("else", ELSE);
 				Add(){ 
-						.literal = buffer,
+						.literal = strdup(buffer),
 						.type = IDENT,
 				};
 		}

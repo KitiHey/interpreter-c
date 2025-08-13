@@ -15,7 +15,7 @@ static void testFunc(char* str, int idx, char* expected, tokenType_t expectedTyp
 				goto terminate;
 		}
 		equal(L[idx].literal, expected) {
-				error(*testNum, "Not the expected: '%s'!='%s'", L[idx].literal, expected);
+				error(*testNum, "Not the expected literal: '%s'!='%s'", L[idx].literal, expected);
 				goto terminate;
 		}
 		success(*testNum, "Returned expected '%s'", expected);
@@ -34,6 +34,10 @@ int main() {
 		testFunc("func }return=let", 5, "EOF", TERMINATE, &testNum);
 		testFunc(";;yo", 1, ";", SEMICOLON, &testNum);
 		testFunc(";;yo", 2, "yo", IDENT, &testNum);
+		testFunc(";;yo!", 2, "yo", IDENT, &testNum);
+		testFunc(";;yo;!{", 2, "yo", IDENT, &testNum);
+		testFunc(";;\"yo o\";!{", 2, "yo o", STRING, &testNum);
+		testFunc(";;yo!", 3, "!", BANG, &testNum);
 		testFunc("\"Hello World!\"", 0, "Hello World!", STRING, &testNum);
 		testFunc("\"Hello\" \"World!\"", 1, "World!", STRING, &testNum);
 		testFunc(";=else", 2, "else", ELSE, &testNum);

@@ -12,6 +12,7 @@ typedef enum TokenType {
 	MINUS,
 	ASTERISK,
 	SLASH,
+	BANG,
 
 	L_BRACKET, // {
 	R_BRACKET, // }
