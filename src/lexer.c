@@ -91,8 +91,9 @@ token_t *Lexer(char* codeFile) {
 						Lex=NULL;
 						return NULL;
 					}
+					buffer[iBuffer] = '\0';
 					Add(){ 
-							.literal = buffer,
+							.literal = strdup(buffer),
 							.type = STRING,
 					};
 					Consume();
