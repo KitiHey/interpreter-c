@@ -117,7 +117,7 @@ token_t *Lexer(char* codeFile) {
 
 				if (!foundChar) {
 						Add(){
-							.literal = buffer,
+							.literal = strdup(buffer),
 							.type = INT,
 						};
 						continue;

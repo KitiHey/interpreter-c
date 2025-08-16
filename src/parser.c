@@ -22,7 +22,6 @@ integerexpr_t* ParseIntExpr(token_t** Lexer, arena_t* Arena) {
 #ifdef ALLOW_TESTS
 		Expr->testString = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
 		sprintf(Expr->testString, "%s", PEEK_LIT());
-		printf("%d\n", Expr->Value);
 #endif
 		CONSUME();
 		return Expr;
