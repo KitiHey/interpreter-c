@@ -39,9 +39,12 @@ void Test(tests_t testT) {
 
 int main() {
 	int Idx = 0;
-	TEST_(Input: "\"Hello\"", StmtIdx: 0, Expected: "Hello;")
-	TEST_(Input: "\"Hello\"\"World\"", StmtIdx: 1, Expected: "World;")
-	TEST_(Input: "1;2;", StmtIdx: 0, Expected: "1;")
+	TEST_(Input: "\"Hello\"", StmtIdx: 0, Expected: "\"Hello\";")
+	TEST_(Input: "\"Hello\"\"World\"", StmtIdx: 1, Expected: "\"World\";")
+	TEST_(Input: "1;2;", StmtIdx: 1, Expected: "2;")
 	TEST_(Input: ";49;", StmtIdx: 0, Expected: "49;")
+	TEST_(Input: ";!49;!3", StmtIdx: 0, Expected: "!(49);")
+	TEST_(Input: ";!49;;;;;;\"Random String\";;;;;;;;;;!59;", StmtIdx: 2, Expected: "!(59);")
+	TEST_(Input: ";!49;;;;;;\"Random String\";;;;;;;;;;!59;", StmtIdx: 0, Expected: "!(49);")
 	return 0;
 }

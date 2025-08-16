@@ -38,7 +38,7 @@ static bool isDigit(char* codeFile, int idx);
 							}
 
 #define peekEquals(charExpected, tokenType, strLiteral) if (PeekIs((char) charExpected)) { \
-								Add() { .type = tokenType, .literal = (char*) strLiteral }; \
+								Add() { .type = tokenType, .literal = (char*)strLiteral }; \
 								Consume(); \
 								continue; \
 							}
