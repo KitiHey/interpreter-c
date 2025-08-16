@@ -5,6 +5,7 @@ tests=(
 	parser/nothing.c
 	parser/int.c
 	parser/expressionStatements.c
+	parser/testParser.c
 )
 ARGS=$@
 

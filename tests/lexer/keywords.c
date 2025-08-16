@@ -40,6 +40,7 @@ int main() {
 		testFunc(";;yo!", 3, "!", BANG, &testNum);
 		testFunc("\"Hello World!\"", 0, "Hello World!", STRING, &testNum);
 		testFunc("\"Hello\" \"World!\"", 1, "World!", STRING, &testNum);
+		testFunc("\"Hello\";;;\"World!\"", 4, "World!", STRING, &testNum);
 		testFunc(";=else", 2, "else", ELSE, &testNum);
 		testFunc(";=if", 2, "if", IF, &testNum);
 		return 0;

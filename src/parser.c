@@ -13,11 +13,17 @@
 #define SKIPSEMI() while (PEEK() == SEMICOLON) { CONSUME(); };
 #define MALLOC(size) ArenaPush(Arena, size)
 #define FREE(Arena) ArenaFree(Arena)
+#define STRLEN(character) (strlen(character) + 1)
 
 integerexpr_t* ParseIntExpr(token_t** Lexer, arena_t* Arena) {
 		integerexpr_t* Expr = MALLOC(sizeof(integerexpr_t));
 		if (Expr == NULL) return NULL;
 		Expr->Value = atoi(PEEK_LIT());
+#ifdef ALLOW_TESTS
+		Expr->testString = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
+		sprintf(Expr->testString, "%s", PEEK_LIT());
+		printf("%d\n", Expr->Value);
+#endif
 		CONSUME();
 		return Expr;
 }
@@ -26,8 +32,7 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 		stringexpr_t* Expr = MALLOC(sizeof(stringexpr_t));
 		if (Expr == NULL) return NULL;
 
-		size_t len = strlen( PEEK_LIT() );
-		Expr->Value = MALLOC(( len+1 ) * sizeof(char*) );
+		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char*) );
 		if (Expr->Value == NULL) { 
 				free(Expr);
 				return NULL;
@@ -36,26 +41,59 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 		strcat(Expr->Value, PEEK_LIT());
 		free(PEEK_LIT());
 		PEEK_LIT() = NULL;
+#ifdef ALLOW_TESTS
+		Expr->testString = Expr->Value;
+#endif
 
 		CONSUME();
 		return Expr;
 }
 
+prefixexpr_t *ParsePrefixExpr(token_t** Lexer, arena_t* Arena) {
+		prefixexpr_t *Expr = MALLOC(sizeof(prefixexpr_t));
+		if (Expr == NULL) return NULL;
+
+		Expr->Operator = MALLOC(strlen(PEEK_LIT()) * sizeof(char));
+		strcat(Expr->Operator, PEEK_LIT());
+		CONSUME();
+		Expr->RightExpr = ParseExpression(Lexer, Arena);
+#ifdef ALLOW_TESTS
+		Expr->testString = MALLOC(( strlen(Expr->RightExpr->testString) + strlen(Expr->Operator) + strlen("()") + 1) * sizeof(char));
+		sprintf(Expr->testString, "(%s%s)", Expr->Operator, Expr->RightExpr->testString);
+#endif
+		return Expr;
+}
+
 expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena) {
 		expressions_t* Expression = MALLOC(sizeof(expressions_t));
-		if (Expression == NULL) { return NULL; }
+		if (Expression == NULL) return NULL;
 		// Prefix
 		switch (PEEK()) {
+				case MINUS:
+				case BANG:
+						Expression->Expr = PREFIX_EXPR;
+						Expression->prefixExpr = ParsePrefixExpr(Lexer, Arena);
+#ifdef ALLOW_TESTS
+						Expression->testString = Expression->prefixExpr->testString;
+#endif
+						break;
 				case INT:
 						Expression->Expr = INTEGER_EXPR;
 						Expression->integerExpr = ParseIntExpr(Lexer, Arena);
+#ifdef ALLOW_TESTS
+						Expression->testString = Expression->integerExpr->testString;
+#endif
 						break;
 				case STRING:
 						Expression->Expr = STRING_EXPR;
 						Expression->stringExpr = ParseStringExpr(Lexer, Arena);
+#ifdef ALLOW_TESTS
+						Expression->testString = Expression->stringExpr->testString;
+#endif
 						break;
 				default:
 						Expression->Expr = NONE_EXPR;
+						Expression->testString = "";
 						CONSUME();
 						break;
 		}
@@ -67,6 +105,9 @@ exprstmt_t* ParseExprStmt(token_t** Lexer, arena_t* Arena) {
 		if (Stmt == NULL) return NULL;
 		Stmt->Expr = ParseExpression(Lexer, Arena);
 		SKIPSEMI();
+#ifdef ALLOW_TESTS
+		Stmt->testString = Stmt->Expr->testString;
+#endif
 		return Stmt;
 }
 
@@ -89,6 +130,10 @@ statements_t *ParseStmt(token_t** Lexer, arena_t* Arena) {
 				default:
 						Statement->Stmt = EXPR_STMT;
 						Statement->exprStmt = ParseExprStmt(Lexer, Arena);
+#ifdef ALLOW_TESTS
+						Statement->testString = MALLOC((STRLEN(Statement->exprStmt->testString)+strlen(";"))*sizeof(char));
+						sprintf(Statement->testString, "%s;", Statement->exprStmt->testString);
+#endif
 		}
 		return Statement;
 }
@@ -106,6 +151,9 @@ stmts_t *ParseStatements(token_t** Lexer, arena_t* Arena) {
 		}
 		Statements->Statement = ParseStmt(Lexer, Arena);
 		Statements->Next = ParseStatements(Lexer, Arena);
+#ifdef ALLOW_TESTS
+		Statements->testString = Statements->Statement->testString;
+#endif
 
 		return Statements;
 }
