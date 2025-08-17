@@ -28,7 +28,7 @@ typedef enum OperatorsPriorities {
 	SUM_PRIOR,
 	MULT_PRIOR,
 	PREFIX_PRIOR,
-	PARENTESIS_PRIOR,
+	HIGHEST_PRIOR,
 } operators_priorities_t;
 
 typedef struct IfExpr {

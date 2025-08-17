@@ -110,6 +110,14 @@ expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena, operators_priori
 		if (Expression == NULL) return NULL;
 		// Prefix
 		switch (PEEK()) {
+				case L_PARENT:
+						CONSUME();
+						Expression = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
+						if (PEEK() != R_PARENT) {
+								return NULL;
+						}
+						CONSUME();
+						break;
 				case MINUS:
 				case BANG:
 						Expression->Expr = PREFIX_EXPR;
@@ -142,10 +150,10 @@ expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena, operators_priori
 				switch (PEEK()) {
 						case PLUS:
 						case MINUS:
-								if (Priority > SUM_PRIOR) { goto end; }
+								if (Priority >= SUM_PRIOR) { goto end; }
 						case ASTERISK:
 						case SLASH:
-								if (Priority > MULT_PRIOR) {
+								if (Priority >= MULT_PRIOR) {
 										goto end;
 								}
 								infixexpr_t* InfixExpr = ParseInfixExpr(Lexer, Arena, Expression);
