@@ -15,6 +15,28 @@
 #define FREE(Arena) ArenaFree(Arena)
 #define STRLEN(character) (strlen(character) + 1)
 
+identexpr_t* ParseIdentExpr(token_t** Lexer, arena_t* Arena) {
+		identexpr_t* Expr = MALLOC(sizeof(stringexpr_t));
+		if (Expr == NULL) return NULL;
+
+		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
+		if (Expr->Value == NULL) {
+				free(Expr);
+				return NULL;
+		}
+
+		strcat(Expr->Value, PEEK_LIT());
+		free(PEEK_LIT());
+		PEEK_LIT() = NULL;
+#ifdef ALLOW_TESTS
+		Expr->testString = MALLOC(STRLEN(Expr->Value) * sizeof(char));
+		strcat(Expr->testString, Expr->Value);
+#endif
+
+		CONSUME();
+		return Expr;
+}
+
 integerexpr_t* ParseIntExpr(token_t** Lexer, arena_t* Arena) {
 		integerexpr_t* Expr = MALLOC(sizeof(integerexpr_t));
 		if (Expr == NULL) return NULL;
@@ -131,6 +153,13 @@ expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena, operators_priori
 						Expression->integerExpr = ParseIntExpr(Lexer, Arena);
 #ifdef ALLOW_TESTS
 						Expression->testString = Expression->integerExpr->testString;
+#endif
+						break;
+				case IDENT:
+						Expression->Expr = IDENT_EXPR;
+						Expression->identExpr = ParseIdentExpr(Lexer, Arena);
+#ifdef ALLOW_TESTS
+						Expression->testString = Expression->identExpr->testString;
 #endif
 						break;
 				case STRING:

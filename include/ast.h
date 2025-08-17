@@ -21,6 +21,7 @@ typedef enum ExpressionsTypes {
 	PREFIX_EXPR,
 	INTEGER_EXPR,
 	IF_EXPR,
+	IDENT_EXPR,
 } expressionsTypes_t;
 
 typedef enum OperatorsPriorities {
@@ -57,6 +58,11 @@ typedef struct InfixExpr {
 	TESTSTRING
 } infixexpr_t;
 
+typedef struct IdentExpr {
+	char* Value;
+	TESTSTRING
+} identexpr_t;
+
 typedef struct StringExpr {
 	char* Value;
 	TESTSTRING
@@ -75,6 +81,7 @@ typedef struct Expressions {
 			integerexpr_t *integerExpr;
 			funcexpr_t *funcExpr;
 			stringexpr_t *stringExpr;
+			identexpr_t *identExpr;
 	};
 	expressionsTypes_t Expr;
 	TESTSTRING

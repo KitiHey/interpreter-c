@@ -59,5 +59,8 @@ int main() {
 	TEST_(Input: "1*92/(4+1)*1-5", StmtIdx: 0, Expected: "((((1*92)/(4+1))*1)-5);")
 	TEST_(Input: "1/(4*4)", StmtIdx: 0, Expected: "(1/(4*4));")
 	TEST_(Input: "1*(4+4)", StmtIdx: 0, Expected: "(1*(4+4));")
+	TEST_(Input: "a*(b+c)", StmtIdx: 0, Expected: "(a*(b+c));")
+	TEST_(Input: "a+\"Hello\"*\"World\"", StmtIdx: 0, Expected: "(a+(\"Hello\"*\"World\"));")
+	TEST_(Input: "!a;", StmtIdx: 0, Expected: "!(a);")
 	return 0;
 }
