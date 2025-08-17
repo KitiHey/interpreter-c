@@ -53,7 +53,7 @@ typedef struct PrefixExpr {
 typedef struct InfixExpr {
 	expressions_t* LeftExpr;
 	expressions_t* RightExpr;
-	operators_t Operator;
+	char* Operator;
 	TESTSTRING
 } infixexpr_t;
 

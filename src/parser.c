@@ -32,7 +32,7 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 		if (Expr == NULL) return NULL;
 
 		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
-		if (Expr->Value == NULL) { 
+		if (Expr->Value == NULL) {
 				free(Expr);
 				return NULL;
 		}
@@ -53,13 +53,30 @@ prefixexpr_t *ParsePrefixExpr(token_t** Lexer, arena_t* Arena) {
 		prefixexpr_t *Expr = MALLOC(sizeof(prefixexpr_t));
 		if (Expr == NULL) return NULL;
 
-		Expr->Operator = MALLOC(strlen(PEEK_LIT()) * sizeof(char));
+		Expr->Operator = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
 		strcat(Expr->Operator, PEEK_LIT());
 		CONSUME();
 		Expr->RightExpr = ParseExpression(Lexer, Arena);
 #ifdef ALLOW_TESTS
 		Expr->testString = malloc((STRLEN(Expr->RightExpr->testString)+strlen(Expr->Operator)*strlen("()")) * sizeof(char));
 		sprintf(Expr->testString, "%c(%s)", Expr->Operator[0], Expr->RightExpr->testString);
+#endif
+		return Expr;
+}
+
+infixexpr_t *ParseInfixExpr(token_t** Lexer, arena_t* Arena, expressions_t* leftExpr) {
+		infixexpr_t *Expr = MALLOC(sizeof(infixexpr_t));
+		if (Expr == NULL) return NULL;
+
+		Expr->LeftExpr = leftExpr;
+		Expr->Operator = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
+		strcat(Expr->Operator, PEEK_LIT());
+		CONSUME();
+		Expr->RightExpr = ParseExpression(Lexer, Arena);
+#ifdef ALLOW_TESTS
+		size_t len = STRLEN(Expr->RightExpr->testString)+strlen(Expr->LeftExpr->testString)+strlen(Expr->Operator)+strlen("()");
+		Expr->testString = MALLOC(len * sizeof(char));
+		sprintf(Expr->testString, "(%s%c%s)", Expr->LeftExpr->testString, Expr->Operator[0], Expr->RightExpr->testString);
 #endif
 		return Expr;
 }
@@ -95,6 +112,23 @@ expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena) {
 						Expression->Expr = NONE_EXPR;
 						Expression->testString = "";
 						CONSUME();
+						break;
+		}
+		switch (PEEK()) {
+				case PLUS:
+				case MINUS:
+				case ASTERISK:
+				case SLASH:
+						infixexpr_t* InfixExpr = ParseInfixExpr(Lexer, Arena, Expression);
+						Expression = MALLOC(sizeof(expressions_t));
+						if (Expression == NULL) { return NULL; }
+						Expression->infixExpr = InfixExpr;
+						Expression->Expr = INFIX_EXPR;
+#ifdef ALLOW_TESTS
+						Expression->testString = InfixExpr->testString;
+#endif
+						break;
+				default:
 						break;
 		}
 		return Expression;
@@ -145,7 +179,7 @@ stmts_t *ParseStatements(token_t** Lexer, arena_t* Arena) {
 		};
 
 		stmts_t *Statements = MALLOC(sizeof(stmts_t));
-		if (Statements == NULL) { 
+		if (Statements == NULL) {
 				FREE(Arena);
 				return NULL;
 		}
@@ -166,6 +200,6 @@ program_t Parser(token_t* Lexer) {
 		if (Program.Arena == NULL) return Program;
 
 		Program.Statements = ParseStatements(&Lexer, Program.Arena);
-		if (Program.Statements == NULL) Program.Arena = NULL; 
+		if (Program.Statements == NULL) Program.Arena = NULL;
 		return Program;
 }

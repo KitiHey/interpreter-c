@@ -23,7 +23,7 @@ static bool isDigit(char* codeFile, int idx);
 
 #define SkipUnnecesary() if (PeekIs(' ')) {\
 								Consume();\
-								continue;} 
+								continue;}
 
 #define IncrementSpace() if (LexIdx+1 >= Allocated) { \
 								Allocated *= 2;\
@@ -42,7 +42,7 @@ static bool isDigit(char* codeFile, int idx);
 								Consume(); \
 								continue; \
 							}
- 
+
 #define Add() IncrementSpace(); Lex[LexIdx++] = (token_t)
 #define Isdigit() isDigit(codeFile, (int) idx)
 
@@ -93,14 +93,14 @@ token_t *Lexer(char* codeFile) {
 						return NULL;
 					}
 					buffer[iBuffer] = '\0';
-					Add(){ 
+					Add(){
 							.literal = strdup(buffer),
 							.type = STRING,
 					};
 					Consume();
 					continue;
 				}
-				
+
 #define P(arg) && !PeekIs(arg)
 				while (!PeekIs(';') P('=') P('!') P(' ') P('\0') P('+') P('-') P('*') P('/') P('(') P(')') P('{') P('}') P(']') P('[') ) {
 #undef P
@@ -127,7 +127,7 @@ token_t *Lexer(char* codeFile) {
 				buffEquals("return", RETURN);
 				buffEquals("if", IF);
 				buffEquals("else", ELSE);
-				Add(){ 
+				Add(){
 						.literal = strdup(buffer),
 						.type = IDENT,
 				};

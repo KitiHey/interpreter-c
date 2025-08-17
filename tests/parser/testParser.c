@@ -46,5 +46,13 @@ int main() {
 	TEST_(Input: ";!49;!3", StmtIdx: 0, Expected: "!(49);")
 	TEST_(Input: ";!49;;;;;;\"Random String\";;;;;;;;;;!59;", StmtIdx: 2, Expected: "!(59);")
 	TEST_(Input: ";!49;;;;;;\"Random String\";;;;;;;;;;!59;", StmtIdx: 0, Expected: "!(49);")
+	TEST_(Input: "1+1", StmtIdx: 0, Expected: "(1+1);")
+	TEST_(Input: "1*1", StmtIdx: 0, Expected: "(1*1);")
+	TEST_(Input: "1/1", StmtIdx: 0, Expected: "(1/1);")
+	TEST_(Input: "1-1", StmtIdx: 0, Expected: "(1-1);")
+	TEST_(Input: "!1-1", StmtIdx: 0, Expected: "!((1-1));")
+	TEST_(Input: "1*1+4", StmtIdx: 0, Expected: "(1*(1+4));")
+	TEST_(Input: "1*!1+4", StmtIdx: 0, Expected: "(1*!((1+4)));")
+	TEST_(Input: "1*92/4+1*1-5", StmtIdx: 0, Expected: "(1*(92/(4+(1*(1-5)))));")
 	return 0;
 }
