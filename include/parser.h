@@ -4,4 +4,4 @@
 #include "arena.h"
 
 program_t Parser(token_t* Lexer);
-expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena);
+expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena, operators_priorities_t Priority);

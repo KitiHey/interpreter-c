@@ -50,9 +50,10 @@ int main() {
 	TEST_(Input: "1*1", StmtIdx: 0, Expected: "(1*1);")
 	TEST_(Input: "1/1", StmtIdx: 0, Expected: "(1/1);")
 	TEST_(Input: "1-1", StmtIdx: 0, Expected: "(1-1);")
-	TEST_(Input: "!1-1", StmtIdx: 0, Expected: "!((1-1));")
-	TEST_(Input: "1*1+4", StmtIdx: 0, Expected: "(1*(1+4));")
-	TEST_(Input: "1*!1+4", StmtIdx: 0, Expected: "(1*!((1+4)));")
-	TEST_(Input: "1*92/4+1*1-5", StmtIdx: 0, Expected: "(1*(92/(4+(1*(1-5)))));")
+	TEST_(Input: "!1-1", StmtIdx: 0, Expected: "(!(1)-1);")
+	TEST_(Input: "1*1+4", StmtIdx: 0, Expected: "((1*1)+4);")
+	TEST_(Input: "1+1*4", StmtIdx: 0, Expected: "(1+(1*4));")
+	TEST_(Input: "1*!1+4", StmtIdx: 0, Expected: "((1*!(1))+4);")
+	TEST_(Input: "1*92/4+1*1-5", StmtIdx: 0, Expected: "((1*(92/4))+((1*1)-5));")
 	return 0;
 }

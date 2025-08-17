@@ -23,13 +23,13 @@ typedef enum ExpressionsTypes {
 	IF_EXPR,
 } expressionsTypes_t;
 
-typedef enum Operators {
-	UNEXISTENT,
-	SUM,
-	MULT,
-	REST,
-	DIV,
-} operators_t;
+typedef enum OperatorsPriorities {
+	LOWEST_PRIOR,
+	SUM_PRIOR,
+	MULT_PRIOR,
+	PREFIX_PRIOR,
+	PARENTESIS_PRIOR,
+} operators_priorities_t;
 
 typedef struct IfExpr {
 	statements_t** Consequence;
