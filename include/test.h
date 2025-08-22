@@ -6,8 +6,8 @@
 #include <tokens.h>
 
 #ifdef ALLOW_TESTS
-  #define test(...) __VA_ARGS__
-  #define testAssert(boolean) assert(boolean)
+#define test(...) __VA_ARGS__
+#define testAssert(boolean) assert(boolean)
 
 static inline bool cmpDefault(void* p1, void* p2) {
 		return p1==p2;

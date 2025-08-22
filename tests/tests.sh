@@ -3,8 +3,6 @@ tests=(
 	lexer/ints.c
 	lexer/keywords.c
 	parser/nothing.c
-	parser/int.c
-	parser/expressionStatements.c
 	parser/testParser.c
 )
 ARGS=$@

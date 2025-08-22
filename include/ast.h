@@ -32,16 +32,21 @@ typedef enum OperatorsPriorities {
 	HIGHEST_PRIOR,
 } operators_priorities_t;
 
+typedef struct ConditionExpressions {
+	expressions_t** Expressions;
+	TESTSTRING
+} conditionexpressions_t;
+
 typedef struct IfExpr {
-	statements_t** Consequence;
-	statements_t** Alternative;
-	expressions_t** Condition;
+	stmts_t* Consequence;
+	stmts_t* Alternative;
+	conditionexpressions_t* Condition;
 	TESTSTRING
 } ifexpr_t;
 
 typedef struct FuncExpr {
-	statements_t** Block;
-	expressions_t** Condition;
+	stmts_t* Block;
+	conditionexpressions_t* Condition;
 	TESTSTRING
 } funcexpr_t;
 
@@ -96,8 +101,8 @@ typedef enum StatementsTypes {
 } statementsTypes_t;
 
 typedef struct FuncStmt {
-	statements_t** Block;
-	expressions_t** Condition;
+	stmts_t* Block;
+	conditionexpressions_t* Condition;
 	char* Ident;
 	TESTSTRING
 } funcstmt_t;
@@ -130,8 +135,7 @@ typedef struct Statements {
 } statements_t;
 
 typedef struct Stmts {
-		statements_t* Statement;
-		stmts_t* Next;
+		statements_t** Statements;
 		TESTSTRING
 } stmts_t;
 
@@ -139,4 +143,5 @@ typedef struct Stmts {
 typedef struct Program {
 		arena_t* Arena;
 		stmts_t* Statements; // * Statements[]
+		TESTSTRING
 } program_t;

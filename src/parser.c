@@ -15,13 +15,107 @@
 #define FREE(Arena) ArenaFree(Arena)
 #define STRLEN(character) (strlen(character) + 1)
 
+conditionexpressions_t* ParseMultipleExpr(token_t** Lexer, arena_t* Arena, tokenType_t delimiter) {
+		token_t* newLex = *Lexer;
+		expressions_t** Buffer = calloc(10, sizeof(expressions_t*));
+		if (Buffer == NULL) { return NULL; }
+#ifdef ALLOW_TESTS
+		char* TestString = calloc(10,  sizeof(char));
+		if (TestString == NULL) { return NULL; }
+		int capString = 10;
+		int idxString = 0;
+#endif
+		int cap = 10;
+		int idx = 0;
+		for (idx = 0; PEEK() != delimiter && PEEK() != TERMINATE; idx++) {
+				if (idx >= cap) {
+						cap *= 2;
+						Buffer = realloc(Buffer, cap*sizeof(expressions_t*));
+				}
+				Buffer[idx] = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
+#ifdef ALLOW_TESTS
+				idxString += strlen(Buffer[idx]->testString)+1;
+				if (idxString >= capString) {
+						while (idxString >= capString) {
+								capString *= 2;
+						}
+						TestString = realloc(TestString, capString * sizeof(char));
+				}
+				strcat(TestString, Buffer[idx]->testString);
+#endif
+		}
+		if (PEEK() == TERMINATE) { return NULL; }
+		conditionexpressions_t* Expr = MALLOC(sizeof(conditionexpressions_t));
+		if (Expr == NULL) { return NULL; }
+		Expr->Expressions = MALLOC((idx+1)*sizeof(expressions_t*));
+		if (Expr->Expressions == NULL) { return NULL; }
+#ifdef ALLOW_TESTS
+		Expr->testString = MALLOC((idxString+1) * sizeof(char));
+		if (Expr->testString == NULL) { return NULL; }
+#endif
+
+		memcpy(Expr->Expressions, Buffer, idx+1);
+		free(Buffer);
+		Buffer=NULL;
+
+#ifdef ALLOW_TESTS
+		memcpy(Expr->testString, TestString, idxString+1);
+		free(TestString);
+		TestString=NULL;
+#endif
+
+		return Expr;
+}
+
+ifexpr_t* ParseIfExpr(token_t** Lexer, arena_t* Arena) {
+		ifexpr_t* Expr = MALLOC(sizeof(ifexpr_t));
+		if (Expr == NULL) { return NULL; }
+		CONSUME();
+
+		if (PEEK() != L_PARENT) { return NULL; }
+		CONSUME();
+
+		Expr->Condition = ParseMultipleExpr(Lexer, Arena, R_PARENT);
+		if (Expr->Condition == NULL) { return NULL; }
+
+		if (PEEK() != R_PARENT) { return NULL; }
+		CONSUME();
+		if (PEEK() != L_BRACKET) { return NULL; }
+		CONSUME();
+		Expr->Consequence = ParseStatements(Lexer, Arena, R_BRACKET);
+		if (PEEK() != R_BRACKET) { return NULL; }
+		CONSUME();
+
+		if (PEEK() == ELSE) { 
+				CONSUME();
+				if (PEEK() != L_BRACKET) { return NULL; }
+				CONSUME();
+				Expr->Alternative = ParseStatements(Lexer, Arena, R_BRACKET);
+				if (PEEK() != R_BRACKET) { return NULL; }
+				CONSUME();
+#ifdef ALLOW_TESTS
+		size_t len = STRLEN(Expr->Condition->testString) + strlen("if () {  } else {  }") + strlen(Expr->Consequence->testString);
+		Expr->testString = MALLOC(len*sizeof(char));
+		sprintf(Expr->testString, "if (%s) { %s } else { %s }", Expr->Condition->testString, Expr->Consequence->testString, Expr->Alternative->testString);
+#endif
+		} 
+#ifdef ALLOW_TESTS
+		else {
+
+				size_t len = STRLEN(Expr->Condition->testString) + strlen("if () {  }") + strlen(Expr->Consequence->testString);
+				Expr->testString = MALLOC(len*sizeof(char));
+				sprintf(Expr->testString, "if (%s) { %s }", Expr->Condition->testString, Expr->Consequence->testString);
+		}
+#endif
+		return Expr;
+}
+
 identexpr_t* ParseIdentExpr(token_t** Lexer, arena_t* Arena) {
 		identexpr_t* Expr = MALLOC(sizeof(stringexpr_t));
 		if (Expr == NULL) return NULL;
 
 		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
 		if (Expr->Value == NULL) {
-				free(Expr);
 				return NULL;
 		}
 
@@ -55,7 +149,6 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 
 		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
 		if (Expr->Value == NULL) {
-				free(Expr);
 				return NULL;
 		}
 
@@ -63,7 +156,7 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 		free(PEEK_LIT());
 		PEEK_LIT() = NULL;
 #ifdef ALLOW_TESTS
-		Expr->testString = MALLOC(( STRLEN(Expr->Value) + strlen("\"")*2) * sizeof(char));
+		Expr->testString = MALLOC(( STRLEN(Expr->Value) + STRLEN("\"")*2) * sizeof(char));
 		sprintf(Expr->testString, "\"%s\"", Expr->Value);
 #endif
 
@@ -80,7 +173,7 @@ prefixexpr_t *ParsePrefixExpr(token_t** Lexer, arena_t* Arena) {
 		CONSUME();
 		Expr->RightExpr = ParseExpression(Lexer, Arena, PREFIX_PRIOR);
 #ifdef ALLOW_TESTS
-		Expr->testString = malloc((STRLEN(Expr->RightExpr->testString)+strlen(Expr->Operator)*strlen("()")) * sizeof(char));
+		Expr->testString = MALLOC((STRLEN(Expr->RightExpr->testString)+strlen(Expr->Operator)+strlen("()")) * sizeof(char));
 		sprintf(Expr->testString, "%c(%s)", Expr->Operator[0], Expr->RightExpr->testString);
 #endif
 		return Expr;
@@ -96,17 +189,6 @@ operators_priorities_t GetInfixPriority(tokenType_t Operator) {
 					return MULT_PRIOR;
 		}
 		return LOWEST_PRIOR;
-}
-
-static inline bool IsOperator(tokenType_t Operator) {
-		switch (Operator) {
-				case PLUS:
-				case MINUS:
-				case ASTERISK:
-				case SLASH:
-					return true;
-		}
-		return false;
 }
 
 infixexpr_t *ParseInfixExpr(token_t** Lexer, arena_t* Arena, expressions_t* leftExpr) {
@@ -127,11 +209,29 @@ infixexpr_t *ParseInfixExpr(token_t** Lexer, arena_t* Arena, expressions_t* left
 		return Expr;
 }
 
+static inline bool IsOperator(tokenType_t Operator) {
+		switch (Operator) {
+				case PLUS:
+				case MINUS:
+				case ASTERISK:
+				case SLASH:
+					return true;
+		}
+		return false;
+};
+
 expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena, operators_priorities_t Priority) {
 		expressions_t* Expression = MALLOC(sizeof(expressions_t));
 		if (Expression == NULL) return NULL;
 		// Prefix
 		switch (PEEK()) {
+				case IF:
+						Expression->Expr = IF_EXPR;
+						Expression->ifExpr = ParseIfExpr(Lexer, Arena);
+#ifdef ALLOW_TESTS
+						Expression->testString = Expression->ifExpr->testString;
+#endif
+						break;
 				case L_PARENT:
 						CONSUME();
 						Expression = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
@@ -238,24 +338,61 @@ statements_t *ParseStmt(token_t** Lexer, arena_t* Arena) {
 		return Statement;
 }
 
-stmts_t *ParseStatements(token_t** Lexer, arena_t* Arena) {
+stmts_t *ParseStatements(token_t** Lexer, arena_t* Arena, tokenType_t delimiter) {
 		SKIPSEMI();
 		if (PEEK() == TERMINATE) {
 				return NULL;
 		};
 
-		stmts_t *Statements = MALLOC(sizeof(stmts_t));
-		if (Statements == NULL) {
-				FREE(Arena);
+		stmts_t *Stmt = MALLOC(sizeof(stmts_t));
+		if (Stmt == NULL) {
 				return NULL;
 		}
-		Statements->Statement = ParseStmt(Lexer, Arena);
-		Statements->Next = ParseStatements(Lexer, Arena);
 #ifdef ALLOW_TESTS
-		Statements->testString = Statements->Statement->testString;
+		char* TestString = calloc(10,sizeof(char));
+		if (TestString == NULL) { return NULL; }
+		int capString = 10;
+		int idxString = 0;
+#endif
+		statements_t** Statements = calloc(4, sizeof(expressions_t*));
+		if (Statements == NULL) { return NULL; }
+		int cap = 4;
+		int idx = 0;
+		for (idx = 0; PEEK() != TERMINATE && PEEK() != delimiter; idx++) {
+				if (idx >= cap) {
+						cap *= 2;
+						Statements = realloc(Statements, cap*sizeof(statements_t*));
+				}
+				Statements[idx] = ParseStmt(Lexer, Arena);
+#ifdef ALLOW_TESTS
+				idxString += strlen(Statements[idx]->testString)+1;
+				if (idxString >= capString) {
+						while (idxString >= capString) {
+								capString *= 2;
+						}
+						TestString = realloc(TestString, capString * sizeof(char));
+				}
+				strcat(TestString, Statements[idx]->testString);
+#endif
+		}
+		Stmt->Statements = MALLOC((idx+1)*sizeof(statements_t*));
+		if (Stmt->Statements == NULL) { return NULL; }
+#ifdef ALLOW_TESTS
+		Stmt->testString = MALLOC((idxString+1) * sizeof(char));
+		if (Stmt->testString == NULL) { return NULL; }
 #endif
 
-		return Statements;
+		memcpy(Stmt->Statements, Statements, idx+1);
+		free(Statements);
+		Statements=NULL;
+
+#ifdef ALLOW_TESTS
+		memcpy(Stmt->testString, TestString, idxString+1);
+		free(TestString);
+		TestString=NULL;
+#endif
+
+		return Stmt;
 }
 
 program_t Parser(token_t* Lexer) {
@@ -265,7 +402,10 @@ program_t Parser(token_t* Lexer) {
 		Program.Arena = ArenaCreate(ARENA_CAP);
 		if (Program.Arena == NULL) return Program;
 
-		Program.Statements = ParseStatements(&Lexer, Program.Arena);
-		if (Program.Statements == NULL) Program.Arena = NULL;
+		Program.Statements = ParseStatements(&Lexer, Program.Arena, TERMINATE);
+		if (Program.Statements == NULL) FREE(Program.Arena); Program.Arena = NULL;
+#ifdef ALLOW_TESTS
+		Program.testString = Program.Statements->testString;
+#endif
 		return Program;
 }
