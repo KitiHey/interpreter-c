@@ -64,6 +64,7 @@ token_t *Lexer(char* codeFile) {
 				SkipUnnecesary();
 				peekEquals(';', SEMICOLON, ";");
 				peekEquals('=', EQUAL, "=");
+				peekEquals(',', COMMA, ",");
 
 				peekEquals('+', PLUS, "+");
 				peekEquals('-', MINUS, "-");
@@ -102,7 +103,7 @@ token_t *Lexer(char* codeFile) {
 				}
 
 #define P(arg) && !PeekIs(arg)
-				while (!PeekIs(';') P('=') P('!') P(' ') P('\0') P('+') P('-') P('*') P('/') P('(') P(')') P('{') P('}') P(']') P('[') ) {
+				while (!PeekIs(';') P(',') P('=') P('!') P(' ') P('\0') P('+') P('-') P('*') P('/') P('(') P(')') P('{') P('}') P(']') P('[') ) {
 #undef P
 						test(bool oldchar = foundChar);
 						foundChar = foundChar ? true: !Isdigit();

@@ -23,6 +23,7 @@ typedef enum TokenType {
 
 	EQUAL,
 	SEMICOLON, // Optional
+	COMMA,
 
 	IF,
 	ELSE,

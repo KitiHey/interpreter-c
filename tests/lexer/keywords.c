@@ -43,5 +43,6 @@ int main() {
 		testFunc("\"Hello\";;;\"World!\"", 4, "World!", STRING, &testNum);
 		testFunc(";=else", 2, "else", ELSE, &testNum);
 		testFunc(";=if", 2, "if", IF, &testNum);
+		testFunc(";=if,", 3, ",", COMMA, &testNum);
 		return 0;
 }

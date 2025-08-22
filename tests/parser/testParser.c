@@ -69,5 +69,10 @@ int main() {
 	TEST_(Input: "if (a+3) { 1+3 };", Expected: "if ((a+3)) { (1+3); };")
 	TEST_(Input: "if (a+3) { if (a+3) { 1+3 }; };", Expected: "if ((a+3)) { if ((a+3)) { (1+3); }; };")
 	TEST_(Input: "if (a+3) { 1+3 } else { \"Hello World!\" };", Expected: "if ((a+3)) { (1+3); } else { \"Hello World!\"; };")
+// Funcs
+	TEST_(Input: "func (a, b, c) { a+b };", Expected: "func (a, b, c) { (a+b); };")
+	TEST_(Input: "func () { a+b };", Expected: "func () { (a+b); };")
+	TEST_(Input: "func () { 3+1 };", Expected: "func () { (3+1); };")
+	TEST_(Input: "func (a,b) { 3 };", Expected: "func (a, b) { 3; };")
 	return 0;
 }

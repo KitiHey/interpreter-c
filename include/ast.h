@@ -11,6 +11,7 @@
 typedef struct Statements statements_t;
 typedef struct Expressions expressions_t;
 typedef struct Stmts stmts_t;
+typedef struct IdentExpr identexpr_t;
 
 // Expressions
 typedef enum ExpressionsTypes {
@@ -37,6 +38,11 @@ typedef struct ConditionExpressions {
 	TESTSTRING
 } conditionexpressions_t;
 
+typedef struct IdentsExpressions {
+	identexpr_t** Idents;
+	TESTSTRING
+} identsexpressions_t;
+
 typedef struct IfExpr {
 	stmts_t* Consequence;
 	stmts_t* Alternative;
@@ -46,7 +52,7 @@ typedef struct IfExpr {
 
 typedef struct FuncExpr {
 	stmts_t* Block;
-	conditionexpressions_t* Condition;
+	identsexpressions_t* Idents;
 	TESTSTRING
 } funcexpr_t;
 
@@ -102,7 +108,7 @@ typedef enum StatementsTypes {
 
 typedef struct FuncStmt {
 	stmts_t* Block;
-	conditionexpressions_t* Condition;
+	identsexpressions_t* Idents;
 	char* Ident;
 	TESTSTRING
 } funcstmt_t;
