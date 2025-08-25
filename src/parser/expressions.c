@@ -79,14 +79,18 @@ identsexpressions_t* ParseMultipleIdents(token_t** Lexer, arena_t* Arena, tokenT
 				if (PEEK() != IDENT) {
 						printf("No ident, else: %s\n", PEEK_LIT());
 						free(Buffer);
+#ifdef ALLOW_TESTS
 						free(TestString);
+#endif
 						return NULL;
 				}
 				Buffer[idx] = ParseIdentExpr(Lexer, Arena);
 				if ( (PEEK() != spacing && PEEK() != delimiter) || Buffer[idx] == NULL) {
 						printf("No coma, else: %s\n", PEEK_LIT());
 						free(Buffer);
+#ifdef ALLOW_TESTS
 						free(TestString);
+#endif
 						return NULL;
 				}
 				if (PEEK() == spacing) {
@@ -273,7 +277,9 @@ expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena, operators_priori
 						break;
 				default:
 						Expression->Expr = NONE_EXPR;
+#ifdef ALLOW_TESTS
 						Expression->testString = "";
+#endif
 						CONSUME();
 						break;
 		}
