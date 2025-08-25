@@ -1,24 +1,26 @@
-SRC=$(wildcard src/*.c)
+SRC=$(wildcard src/*.c) $(wildcard src/parser/*.c)
 TEST=sh tests/tests.sh
 CFLAGS=-Iinclude
+BUILD_DIR=build/src/parser
 
-OBJECT_FILE=$(notdir $(SRC:.c=.o))
 BIN_FILE=interpreter
+OBJ_FILES=$(SRC:%.c=build/%.o)
+
+build/%.o: %.c
+	mkdir -p $(dir $@)
+	gcc -c $< -o $@ $(CFLAGS) -DALLOW_TESTS
 
 $(BIN_FILE):
 	gcc $(SRC) -o $@ $(CFLAGS)
 
-%.o: src/%.c
-	gcc -c $< -o $@ $(CFLAGS) -DALLOW_TESTS
-
 build: $(BIN_FILE)
-	@echo "All Built!"
+	echo "All Built!"
 
-test: $(OBJECT_FILE)
-	@$(TEST) $^ $(CFLAGS) -DALLOW_TESTS
+test: $(OBJ_FILES)
+	$(TEST) $^ $(CFLAGS)
 	@echo "All Tested!"
 
 clean:
-	@if [[ -f "lexer.o" ]]; then rm $(OBJECT_FILE); fi
+	@if [[ -d "build/" ]]; then rm -r build/; fi
 	@if [[ -f "$(BIN_FILE)" ]]; then rm $(BIN_FILE); fi
 	@echo "All Cleaned!"
