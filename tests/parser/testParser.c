@@ -30,7 +30,7 @@ void Test(tests_t testT) {
 				return;
 		}
 		success(*(testT.Idx), "got %s", testT.Expected);
-		*(testT.Idx)++;
+		*(testT.Idx)+=1;
 		free(P.Arena);
 }
 
