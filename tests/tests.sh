@@ -2,13 +2,14 @@ tests=(
 	lexer/nothing.c 
 	lexer/ints.c
 	lexer/keywords.c
+	parser/nothing.c
+	parser/testParser.c
 )
-CODE=$1
-HEADERS=$2
+ARGS=$@
 
 for i in ${tests[@]}; do 
 	echo "=== Testing" ${i} "==="
-	gcc tests/${i} ${CODE} -o test.out ${HEADERS} -DALLOW_TESTS
+	gcc tests/${i} ${ARGS} -o test.out -DALLOW_TESTS
 	./test.out
 	rm test.out
 done

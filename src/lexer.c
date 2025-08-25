@@ -23,7 +23,7 @@ static bool isDigit(char* codeFile, int idx);
 
 #define SkipUnnecesary() if (PeekIs(' ')) {\
 								Consume();\
-								continue;} 
+								continue;}
 
 #define IncrementSpace() if (LexIdx+1 >= Allocated) { \
 								Allocated *= 2;\
@@ -38,11 +38,11 @@ static bool isDigit(char* codeFile, int idx);
 							}
 
 #define peekEquals(charExpected, tokenType, strLiteral) if (PeekIs((char) charExpected)) { \
-								Add() { .type = tokenType, .literal = (char*) strLiteral }; \
+								Add() { .type = tokenType, .literal = (char*)strLiteral }; \
 								Consume(); \
 								continue; \
 							}
- 
+
 #define Add() IncrementSpace(); Lex[LexIdx++] = (token_t)
 #define Isdigit() isDigit(codeFile, (int) idx)
 
@@ -62,8 +62,29 @@ token_t *Lexer(char* codeFile) {
 				buffer[0] = '\0';
 
 				SkipUnnecesary();
+				if (PeekIs('!')) {
+						Consume();
+						if (PeekIs('=')) {
+								Add() { .type = BOOL_NOT_EQUALS, .literal = "!=" };
+								Consume();
+						} else {
+								Add() { .type = BANG, .literal = "!" };
+						}
+						continue;
+				}
+				if (PeekIs('=')) {
+						Consume();
+						if (PeekIs('=')) {
+								Add() { .type = BOOL_EQUALS, .literal = "==" };
+								Consume();
+						} else {
+								Add() { .type = EQUAL, .literal = "=" };
+						}
+						continue;
+				}
+
 				peekEquals(';', SEMICOLON, ";");
-				peekEquals('=', EQUAL, "=");
+				peekEquals(',', COMMA, ",");
 
 				peekEquals('+', PLUS, "+");
 				peekEquals('-', MINUS, "-");
@@ -91,16 +112,17 @@ token_t *Lexer(char* codeFile) {
 						Lex=NULL;
 						return NULL;
 					}
-					Add(){ 
-							.literal = buffer,
+					buffer[iBuffer] = '\0';
+					Add(){
+							.literal = strdup(buffer),
 							.type = STRING,
 					};
 					Consume();
 					continue;
 				}
-				
+
 #define P(arg) && !PeekIs(arg)
-				while (!PeekIs(';') P('=') P(' ') P('\0') P('+') P('-') P('*') P('/') P('(') P(')') P('{') P('}') P(']') P('[') ) {
+				while (!PeekIs(';') P(',') P('=') P('!') P(' ') P('\0') P('+') P('-') P('*') P('/') P('(') P(')') P('{') P('}') P(']') P('[') ) {
 #undef P
 						test(bool oldchar = foundChar);
 						foundChar = foundChar ? true: !Isdigit();
@@ -115,7 +137,7 @@ token_t *Lexer(char* codeFile) {
 
 				if (!foundChar) {
 						Add(){
-							.literal = buffer,
+							.literal = strdup(buffer),
 							.type = INT,
 						};
 						continue;
@@ -125,8 +147,8 @@ token_t *Lexer(char* codeFile) {
 				buffEquals("return", RETURN);
 				buffEquals("if", IF);
 				buffEquals("else", ELSE);
-				Add(){ 
-						.literal = buffer,
+				Add(){
+						.literal = strdup(buffer),
 						.type = IDENT,
 				};
 		}

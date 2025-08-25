@@ -12,6 +12,10 @@ typedef enum TokenType {
 	MINUS,
 	ASTERISK,
 	SLASH,
+	BANG,
+
+	BOOL_EQUALS,
+	BOOL_NOT_EQUALS,
 
 	L_BRACKET, // {
 	R_BRACKET, // }
@@ -22,6 +26,7 @@ typedef enum TokenType {
 
 	EQUAL,
 	SEMICOLON, // Optional
+	COMMA,
 
 	IF,
 	ELSE,
