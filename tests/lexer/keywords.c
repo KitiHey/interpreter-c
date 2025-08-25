@@ -10,12 +10,12 @@ static void testFunc(char* str, int idx, char* expected, tokenType_t expectedTyp
 				(*testNum)++;
 				return;
 		}
-		equal(L[idx].type, expectedType) {
-				error(*testNum, "Not the expected type: '%d'!='%d'", L[idx].type, expectedType);
-				goto terminate;
-		}
 		equal(L[idx].literal, expected) {
 				error(*testNum, "Not the expected literal: '%s'!='%s'", L[idx].literal, expected);
+				goto terminate;
+		}
+		equal(L[idx].type, expectedType) {
+				error(*testNum, "Not the expected type: '%d'!='%d'", L[idx].type, expectedType);
 				goto terminate;
 		}
 		success(*testNum, "Returned expected '%s'", expected);
@@ -44,5 +44,9 @@ int main() {
 		testFunc(";=else", 2, "else", ELSE, &testNum);
 		testFunc(";=if", 2, "if", IF, &testNum);
 		testFunc(";=if,", 3, ",", COMMA, &testNum);
+		testFunc(";=if,!=", 4, "!=", BOOL_NOT_EQUALS, &testNum);
+		testFunc(";=if,==", 4, "==", BOOL_EQUALS, &testNum);
+		testFunc(";=if,===!=", 4, "==", BOOL_EQUALS, &testNum);
+		testFunc(";=if,===!=", 5, "=", EQUAL, &testNum);
 		return 0;
 }

@@ -285,6 +285,9 @@ operators_priorities_t GetInfixPriority(tokenType_t Operator) {
 				case ASTERISK:
 				case SLASH:
 					return MULT_PRIOR;
+				case BOOL_EQUALS:
+				case BOOL_NOT_EQUALS:
+					return LOWEST_PRIOR;
 		}
 		return LOWEST_PRIOR;
 }
@@ -302,7 +305,7 @@ infixexpr_t *ParseInfixExpr(token_t** Lexer, arena_t* Arena, expressions_t* left
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Expr->RightExpr->testString)+strlen(Expr->LeftExpr->testString)+strlen(Expr->Operator)+strlen("()");
 		Expr->testString = MALLOC(len * sizeof(char));
-		sprintf(Expr->testString, "(%s%c%s)", Expr->LeftExpr->testString, Expr->Operator[0], Expr->RightExpr->testString);
+		sprintf(Expr->testString, "(%s%s%s)", Expr->LeftExpr->testString, Expr->Operator, Expr->RightExpr->testString);
 #endif
 		return Expr;
 }
@@ -313,6 +316,8 @@ static inline bool IsOperator(tokenType_t Operator) {
 				case MINUS:
 				case ASTERISK:
 				case SLASH:
+				case BOOL_EQUALS:
+				case BOOL_NOT_EQUALS:
 					return true;
 		}
 		return false;
@@ -383,14 +388,15 @@ expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena, operators_priori
 		}
 		while (IsOperator(PEEK())) {
 				switch (PEEK()) {
+						case BOOL_EQUALS:
+						case BOOL_NOT_EQUALS:
+								if (Priority > LOWEST_PRIOR) { goto end; }
 						case PLUS:
 						case MINUS:
 								if (Priority >= SUM_PRIOR) { goto end; }
 						case ASTERISK:
 						case SLASH:
-								if (Priority >= MULT_PRIOR) {
-										goto end;
-								}
+								if (Priority >= MULT_PRIOR) { goto end; }
 								infixexpr_t* InfixExpr = ParseInfixExpr(Lexer, Arena, Expression);
 								Expression = MALLOC(sizeof(expressions_t));
 								if (Expression == NULL) { return NULL; }

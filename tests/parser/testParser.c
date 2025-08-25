@@ -86,6 +86,12 @@ int main() {
 	TEST_(Input: "func x (a, b, c) { a+b };", Expected: "func x(a, b, c) { (a+b); };")
 	TEST_(Input: "func x () { a+b };", Expected: "func x() { (a+b); };")
 	TEST_(Input: "func y () { 3+1 };", Expected: "func y() { (3+1); };")
+	TEST_(Input: "func y () { 3+1 };", Expected: "func y() { (3+1); };")
 	TEST_(Input: "func hello (a,b) { 3 };", Expected: "func hello(a, b) { 3; };")
+// Booleans
+	TEST_(Input: "a==b", Expected: "(a==b);")
+	TEST_(Input: "a!=b", Expected: "(a!=b);")
+	TEST_(Input: "a+49!=b*4", Expected: "((a+49)!=(b*4));")
+	TEST_(Input: "if(1+1==2) { return \"Hello World!\"; }", Expected: "if (((1+1)==2)) { return \"Hello World!\"; };")
 	return 0;
 }

@@ -62,8 +62,28 @@ token_t *Lexer(char* codeFile) {
 				buffer[0] = '\0';
 
 				SkipUnnecesary();
+				if (PeekIs('!')) {
+						Consume();
+						if (PeekIs('=')) {
+								Add() { .type = BOOL_NOT_EQUALS, .literal = "!=" };
+								Consume();
+						} else {
+								Add() { .type = BANG, .literal = "!" };
+						}
+						continue;
+				}
+				if (PeekIs('=')) {
+						Consume();
+						if (PeekIs('=')) {
+								Add() { .type = BOOL_EQUALS, .literal = "==" };
+								Consume();
+						} else {
+								Add() { .type = EQUAL, .literal = "=" };
+						}
+						continue;
+				}
+
 				peekEquals(';', SEMICOLON, ";");
-				peekEquals('=', EQUAL, "=");
 				peekEquals(',', COMMA, ",");
 
 				peekEquals('+', PLUS, "+");
@@ -74,7 +94,6 @@ token_t *Lexer(char* codeFile) {
 				peekEquals('(', L_PARENT, "(");
 				peekEquals(')', R_PARENT, ")");
 				peekEquals('{', L_BRACKET, "{");
-				peekEquals('!', BANG, "!");
 				peekEquals('}', R_BRACKET, "}");
 				peekEquals('[', L_BRACE, "[");
 				peekEquals(']', R_BRACE, "]");

@@ -14,6 +14,9 @@ typedef enum TokenType {
 	SLASH,
 	BANG,
 
+	BOOL_EQUALS,
+	BOOL_NOT_EQUALS,
+
 	L_BRACKET, // {
 	R_BRACKET, // }
 	L_PARENT, // (
