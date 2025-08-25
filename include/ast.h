@@ -107,9 +107,8 @@ typedef enum StatementsTypes {
 } statementsTypes_t;
 
 typedef struct FuncStmt {
-	stmts_t* Block;
-	identsexpressions_t* Idents;
-	char* Ident;
+	funcexpr_t* Expr;
+	identexpr_t* Ident;
 	TESTSTRING
 } funcstmt_t;
 
@@ -125,7 +124,7 @@ typedef struct ReturnStmt {
 
 typedef struct LetStmt {
 	expressions_t* Expr;
-	char* Ident;
+	identexpr_t* Ident;
 	TESTSTRING
 } letstmt_t;
 

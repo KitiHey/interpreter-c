@@ -74,5 +74,18 @@ int main() {
 	TEST_(Input: "func () { a+b };", Expected: "func () { (a+b); };")
 	TEST_(Input: "func () { 3+1 };", Expected: "func () { (3+1); };")
 	TEST_(Input: "func (a,b) { 3 };", Expected: "func (a, b) { 3; };")
+// Lets
+	TEST_(Input: "let x = 4;", Expected: "let x = 4;")
+	TEST_(Input: "let x = 1+1;", Expected: "let x = (1+1);")
+	TEST_(Input: "let x = \"Hello World!\"", Expected: "let x = \"Hello World!\";")
+// Returns
+	TEST_(Input: "return 4;", Expected: "return 4;")
+	TEST_(Input: "return \"Hello World!\";", Expected: "return \"Hello World!\";")
+	TEST_(Input: "if(1+1) { return \"Hello World!\"; }", Expected: "if ((1+1)) { return \"Hello World!\"; };")
+// Funcs Stmts
+	TEST_(Input: "func x (a, b, c) { a+b };", Expected: "func x(a, b, c) { (a+b); };")
+	TEST_(Input: "func x () { a+b };", Expected: "func x() { (a+b); };")
+	TEST_(Input: "func y () { 3+1 };", Expected: "func y() { (3+1); };")
+	TEST_(Input: "func hello (a,b) { 3 };", Expected: "func hello(a, b) { 3; };")
 	return 0;
 }
