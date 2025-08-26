@@ -17,9 +17,6 @@ identexpr_t* ParseIdentExpr(token_t** Lexer, arena_t* Arena) {
 		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
 		if (Expr->Value == NULL) return NULL;
 		strcat(Expr->Value, PEEK_LIT());
-
-		free(PEEK_LIT());
-		PEEK_LIT() = NULL;
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Expr->Value);
 		Expr->testString = MALLOC(len * sizeof(char));
@@ -54,9 +51,6 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
 		if (Expr->Value == NULL) return NULL;
 		strcat(Expr->Value, PEEK_LIT());
-
-		free(PEEK_LIT());
-		PEEK_LIT() = NULL;
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Expr->Value) + STRLEN("\"")*2;
 		Expr->testString = MALLOC(len * sizeof(char));

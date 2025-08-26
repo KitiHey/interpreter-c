@@ -13,7 +13,8 @@ typedef struct Tests {
 } tests_t;
 
 void Test(tests_t testT) {
-		token_t *L = Lexer(testT.Input);
+		lexer_t *LexerT = Lexer(testT.Input);
+		token_t *L = LexerT->tokens;
 		program_t P = Parser(L);
 
 		stmts_t *Stmt = P.Statements;

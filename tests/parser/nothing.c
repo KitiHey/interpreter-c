@@ -3,7 +3,8 @@
 #include "parser.h"
 
 int main() {
-	token_t *L = Lexer("");
+	lexer_t *LexerT = Lexer("");
+	token_t *L = LexerT->tokens;
 	program_t P = Parser(L);
 	equal(P.Statements, NULL) {
 		error(0, "'Statements' isn't NULL");

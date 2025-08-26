@@ -4,7 +4,8 @@
 #include <stdlib.h>
 
 static void testFunc(char* str, int idx, char* expected, tokenType_t expectedType, int* testNum) {
-		token_t *L = Lexer(str);
+		lexer_t* LexerT = Lexer(str);
+		token_t *L = LexerT->tokens;
 		nequal(L, NULL) {
 				error(*testNum, "Returned NULL '%s'", str);
 				(*testNum)++;

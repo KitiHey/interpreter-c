@@ -3,7 +3,8 @@
 #include "test.h"
 
 int main() {
-	token_t *L = Lexer("");
+	lexer_t* LexerT = Lexer("");
+	token_t *L = LexerT->tokens;
 	nequal(L, NULL) {
 			error(0, "Returned NULL");
 			return 1;

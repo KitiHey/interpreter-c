@@ -4,7 +4,8 @@
 #include <stdlib.h>
 
 int testLexer(char* numProvided, char* num, int idx_Lexer, int testNum) {
-	token_t *L = Lexer(numProvided);
+	lexer_t* LexerT = Lexer(numProvided);
+	token_t *L = LexerT->tokens;
 	nequal(L, NULL) {
 			error(testNum, "Returned NULL");
 			return 1;
