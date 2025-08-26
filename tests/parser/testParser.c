@@ -87,6 +87,7 @@ int main() {
 	TEST_(Input: "func x () { a+b };", Expected: "func x() { (a+b); };")
 	TEST_(Input: "func y () { 3+1 };", Expected: "func y() { (3+1); };")
 	TEST_(Input: "func y () { 3+1 };", Expected: "func y() { (3+1); };")
+	TEST_(Input: "func y () {};", Expected: "func y() {  };")
 	TEST_(Input: "func hello (a,b) { 3 };", Expected: "func hello(a, b) { 3; };")
 // Booleans
 	TEST_(Input: "a==b", Expected: "(a==b);")

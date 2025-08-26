@@ -21,17 +21,18 @@ exprstmt_t* ParseExprStmt(token_t** Lexer, arena_t* Arena) {
 letstmt_t* ParseLetStmt(token_t** Lexer, arena_t* Arena) {
 		letstmt_t* Stmt = MALLOC(sizeof(letstmt_t));
 		if (Stmt == NULL) return NULL;
-		if (PEEK() != IDENT) { return NULL; }
+		if (PEEK() != IDENT) return NULL;
 		Stmt->Ident = ParseIdentExpr(Lexer, Arena);
-		if (Stmt->Ident == NULL) { return NULL; }
-		if (PEEK() != EQUAL) { return NULL; }
+		if (Stmt->Ident == NULL) return NULL;
+		if (PEEK() != EQUAL) return NULL;
 		CONSUME();
 		Stmt->Expr = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
-		if (Stmt->Expr == NULL) { return NULL; }
+		if (Stmt->Expr == NULL) return NULL;
 		SKIPSEMI();
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Stmt->Expr->testString)+STRLEN(Stmt->Ident->testString)+strlen("let  = ");
 		Stmt->testString = MALLOC(len*sizeof(char));
+		if (Stmt->testString == NULL) return NULL;
 		sprintf(Stmt->testString, "let %s = %s", Stmt->Ident->testString, Stmt->Expr->testString);
 #endif
 		return Stmt;
@@ -41,10 +42,11 @@ returnstmt_t* ParseReturnStmt(token_t** Lexer, arena_t* Arena) {
 		returnstmt_t* Stmt = MALLOC(sizeof(returnstmt_t));
 		if (Stmt == NULL) { return NULL; }
 		Stmt->Expr = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
-		if (Stmt->Expr == NULL) { return NULL; }
+		if (Stmt->Expr == NULL) return NULL;
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Stmt->Expr->testString)+strlen("return ");
 		Stmt->testString = MALLOC(len*sizeof(char));
+		if (Stmt->testString == NULL) return NULL;
 		sprintf(Stmt->testString, "return %s", Stmt->Expr->testString);
 #endif
 		SKIPSEMI();
@@ -53,15 +55,16 @@ returnstmt_t* ParseReturnStmt(token_t** Lexer, arena_t* Arena) {
 
 funcstmt_t* ParseFuncStmt(token_t** Lexer, arena_t* Arena) {
 		funcstmt_t* Stmt = MALLOC(sizeof(funcstmt_t));
-		if (Stmt == NULL) { return NULL; }
-		if (PEEK() != IDENT) { return NULL; }
+		if (Stmt == NULL) return NULL;
+		if (PEEK() != IDENT) return NULL;
 		Stmt->Ident = ParseIdentExpr(Lexer, Arena);
-		if (Stmt->Ident == NULL) { return NULL; }
+		if (Stmt->Ident == NULL) return NULL;
 		Stmt->Expr = ParseFuncExpr(Lexer, Arena);
-		if (Stmt->Expr == NULL) { return NULL; }
+		if (Stmt->Expr == NULL) return NULL;
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Stmt->Expr->testString)+STRLEN(Stmt->Ident->testString);
 		Stmt->testString = MALLOC(len*sizeof(char));
+		if (Stmt->testString == NULL) return NULL;
 		sprintf(Stmt->testString, "func %s%s", Stmt->Ident->testString, Stmt->Expr->testString+5);
 #endif
 

@@ -15,18 +15,18 @@ identexpr_t* ParseIdentExpr(token_t** Lexer, arena_t* Arena) {
 		if (Expr == NULL) return NULL;
 
 		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
-		if (Expr->Value == NULL) {
-				return NULL;
-		}
-
+		if (Expr->Value == NULL) return NULL;
 		strcat(Expr->Value, PEEK_LIT());
+
 		free(PEEK_LIT());
 		PEEK_LIT() = NULL;
 #ifdef ALLOW_TESTS
-		Expr->testString = MALLOC(STRLEN(Expr->Value) * sizeof(char));
+		size_t len = STRLEN(Expr->Value);
+		Expr->testString = MALLOC(len * sizeof(char));
+		if (Expr->testString == NULL) return NULL;
+
 		strcat(Expr->testString, Expr->Value);
 #endif
-
 		CONSUME();
 		return Expr;
 }
@@ -35,8 +35,12 @@ integerexpr_t* ParseIntExpr(token_t** Lexer, arena_t* Arena) {
 		integerexpr_t* Expr = MALLOC(sizeof(integerexpr_t));
 		if (Expr == NULL) return NULL;
 		Expr->Value = atoi(PEEK_LIT());
+
 #ifdef ALLOW_TESTS
-		Expr->testString = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
+		size_t len = STRLEN(PEEK_LIT());
+		Expr->testString = MALLOC(len * sizeof(char));
+		if (Expr->testString == NULL) return NULL;
+
 		sprintf(Expr->testString, "%s", PEEK_LIT());
 #endif
 		CONSUME();
@@ -48,15 +52,16 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 		if (Expr == NULL) return NULL;
 
 		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
-		if (Expr->Value == NULL) {
-				return NULL;
-		}
-
+		if (Expr->Value == NULL) return NULL;
 		strcat(Expr->Value, PEEK_LIT());
+
 		free(PEEK_LIT());
 		PEEK_LIT() = NULL;
 #ifdef ALLOW_TESTS
-		Expr->testString = MALLOC(( STRLEN(Expr->Value) + STRLEN("\"")*2) * sizeof(char));
+		size_t len = STRLEN(Expr->Value) + STRLEN("\"")*2;
+		Expr->testString = MALLOC(len * sizeof(char));
+		if (Expr->testString == NULL) return NULL;
+
 		sprintf(Expr->testString, "\"%s\"", Expr->Value);
 #endif
 
@@ -69,11 +74,17 @@ prefixexpr_t *ParsePrefixExpr(token_t** Lexer, arena_t* Arena) {
 		if (Expr == NULL) return NULL;
 
 		Expr->Operator = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
+		if (Expr->Operator == NULL) return NULL;
 		strcat(Expr->Operator, PEEK_LIT());
+
 		CONSUME();
 		Expr->RightExpr = ParseExpression(Lexer, Arena, PREFIX_PRIOR);
+		if (Expr->RightExpr == NULL) return NULL;
 #ifdef ALLOW_TESTS
-		Expr->testString = MALLOC((STRLEN(Expr->RightExpr->testString)+strlen(Expr->Operator)+strlen("()")) * sizeof(char));
+		size_t len = STRLEN(Expr->RightExpr->testString)+strlen(Expr->Operator)+strlen("()");
+		Expr->testString = MALLOC(len * sizeof(char));
+		if (Expr->testString == NULL) return NULL;
+
 		sprintf(Expr->testString, "%c(%s)", Expr->Operator[0], Expr->RightExpr->testString);
 #endif
 		return Expr;
@@ -85,13 +96,18 @@ infixexpr_t *ParseInfixExpr(token_t** Lexer, arena_t* Arena, expressions_t* left
 
 		Expr->LeftExpr = leftExpr;
 		Expr->Operator = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
+		if (Expr->Operator == NULL) return NULL;
+
 		strcat(Expr->Operator, PEEK_LIT());
 		operators_priorities_t Priority = GetInfixPriority(PEEK());
 		CONSUME();
 		Expr->RightExpr = ParseExpression(Lexer, Arena, Priority);
+		if (Expr->RightExpr == NULL) return NULL;
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Expr->RightExpr->testString)+strlen(Expr->LeftExpr->testString)+strlen(Expr->Operator)+strlen("()");
 		Expr->testString = MALLOC(len * sizeof(char));
+		if (Expr->testString == NULL) return NULL;
+
 		sprintf(Expr->testString, "(%s%s%s)", Expr->LeftExpr->testString, Expr->Operator, Expr->RightExpr->testString);
 #endif
 		return Expr;
