@@ -3,7 +3,8 @@
 #include "test.h"
 
 int main() {
-	token_t *L = Lexer("");
+	lexer_t* LexerT = Lexer("");
+	token_t *L = LexerT->tokens;
 	nequal(L, NULL) {
 			error(0, "Returned NULL");
 			return 1;
@@ -13,5 +14,7 @@ int main() {
 		return 1;
 	}
 	success(0, "nothing in Lexer");
+	L = NULL;
+	FREE_LEXER(LexerT);
 	return 0;
 }

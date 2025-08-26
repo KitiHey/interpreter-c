@@ -4,7 +4,7 @@
 #include "ast.h"
 #include <stdlib.h>
 
-#define TEST_(...) Test( (tests_t) { Idx: &Idx, __VA_ARGS__ } );
+#define TEST_(...) if( Test( (tests_t) { Idx: &Idx, __VA_ARGS__ } ) != 0 ) return 1;
 
 typedef struct Tests {
 	char* Expected;
@@ -12,26 +12,35 @@ typedef struct Tests {
 	int* Idx;
 } tests_t;
 
-void Test(tests_t testT) {
-		token_t *L = Lexer(testT.Input);
+int Test(tests_t testT) {
+		lexer_t *LexerT = Lexer(testT.Input);
+		token_t *L = LexerT->tokens;
 		program_t P = Parser(L);
 
 		stmts_t *Stmt = P.Statements;
 		nequal(Stmt, NULL) {
 				error(*(testT.Idx), "stmts are NULL");
-				return;
+				free(P.Arena);
+				FREE_LEXER(LexerT);
+				return 1;
 		}
 		nequal(Stmt->Statements, NULL) {
 				error(*(testT.Idx), "stmts are NULL");
-				return;
+				free(P.Arena);
+				FREE_LEXER(LexerT);
+				return 1;
 		}
 		equal(P.testString, testT.Expected) {
 				error(*(testT.Idx), "got '%s' instead of '%s'", P.testString, testT.Expected);
-				return;
+				free(P.Arena);
+				FREE_LEXER(LexerT);
+				return 1;
 		}
 		success(*(testT.Idx), "got %s", testT.Expected);
 		*(testT.Idx)+=1;
 		free(P.Arena);
+		FREE_LEXER(LexerT);
+		return 0;
 }
 
 int main() {
@@ -87,6 +96,7 @@ int main() {
 	TEST_(Input: "func x () { a+b };", Expected: "func x() { (a+b); };")
 	TEST_(Input: "func y () { 3+1 };", Expected: "func y() { (3+1); };")
 	TEST_(Input: "func y () { 3+1 };", Expected: "func y() { (3+1); };")
+	TEST_(Input: "func y () {};", Expected: "func y() {  };")
 	TEST_(Input: "func hello (a,b) { 3 };", Expected: "func hello(a, b) { 3; };")
 // Booleans
 	TEST_(Input: "a==b", Expected: "(a==b);")

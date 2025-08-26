@@ -3,8 +3,11 @@
 #include "test.h"
 #include <stdlib.h>
 
+#define _TEST(numProvided, num, idx_lexer) if( testLexer(numProvided, num, idx_lexer, testnum++) != 0) { return 1; }
+
 int testLexer(char* numProvided, char* num, int idx_Lexer, int testNum) {
-	token_t *L = Lexer(numProvided);
+	lexer_t* LexerT = Lexer(numProvided);
+	token_t *L = LexerT->tokens;
 	nequal(L, NULL) {
 			error(testNum, "Returned NULL");
 			return 1;
@@ -18,18 +21,19 @@ int testLexer(char* numProvided, char* num, int idx_Lexer, int testNum) {
 			return 1;
 	}
 	success(testNum, "Int lexed into %s", num);
-	free(L);
 	L=NULL;
+	FREE_LEXER(LexerT);
 	return 0;
 }
 
 int main() {
-	testLexer("2910", "2910", 0, 1);
-	testLexer("4909", "4909", 0, 0);
-	testLexer("8713", "8713", 0, 2);
-	testLexer("8713 4909", "4909", 1, 3);
-	testLexer("4909 2910", "2910", 1, 4);
-	testLexer("4909 29102 97210", "97210", 2, 5);
-	testLexer("4909 2910 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 17310", "17310", 32, 6);
+	int testnum = 0;
+	_TEST("2910", "2910", 0);
+	_TEST("4909", "4909", 0);
+	_TEST("8713", "8713", 0);
+	_TEST("8713 4909", "4909", 1);
+	_TEST("4909 2910", "2910", 1);
+	_TEST("4909 29102 97210", "97210", 2);
+	_TEST("4909 2910 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 97210 17310", "17310", 32);
 	return 0;
 }

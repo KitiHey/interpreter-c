@@ -22,7 +22,7 @@ arena_t* ArenaCreate(int64_t capacity) {
 
 void* ArenaPush(arena_t* arena, size_t capacity) {
 		if (arena->position+capacity > arena->capacity) {
-				printf("Arena out of bounds: %d>%d\n", arena->position+capacity, arena->capacity);
+				printf("Arena out of bounds: %ld>%ld\n", arena->position+capacity, arena->capacity);
 				return NULL;
 		}
 

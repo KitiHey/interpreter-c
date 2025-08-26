@@ -5,6 +5,7 @@ tests=(
 	parser/nothing.c
 	parser/testParser.c
 )
+set -e
 ARGS=$@
 
 for i in ${tests[@]}; do 

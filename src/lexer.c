@@ -1,6 +1,8 @@
 #include "lexer.h"
 #include "tokens.h"
 #include "test.h"
+#include "arena.h"
+#include "tools.h"
 #include <string.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -15,7 +17,6 @@ static char consume(char* code, int *idx) {
 		return code[ (*idx)++ ];
 }
 static bool isDigit(char* codeFile, int idx);
-
 
 #define Peek() codeFile[idx]
 #define PeekIs(peekChr) (Peek()==peekChr)
@@ -45,13 +46,21 @@ static bool isDigit(char* codeFile, int idx);
 
 #define Add() IncrementSpace(); Lex[LexIdx++] = (token_t)
 #define Isdigit() isDigit(codeFile, (int) idx)
+#define MALLOC(capacity) 
+#define STRDUP(str) Strdup(NewLexer->arena, (char*) str)
 
-token_t *Lexer(char* codeFile) {
+lexer_t *Lexer(char* codeFile) {
 		if (codeFile==NULL) return NULL;
 
 		token_t *Lex = calloc(2, sizeof(token_t));
 		assert(Lex!=NULL);
 		size_t len = strlen(codeFile);
+
+		lexer_t *NewLexer = malloc(sizeof(lexer_t));
+		assert(NewLexer!=NULL);
+
+		NewLexer->arena = ArenaCreate(ARENA_CAP);
+		assert(NewLexer->arena!=NULL);
 
 		int idx = 0;
 		int LexIdx = 0;
@@ -114,7 +123,7 @@ token_t *Lexer(char* codeFile) {
 					}
 					buffer[iBuffer] = '\0';
 					Add(){
-							.literal = strdup(buffer),
+							.literal = STRDUP(buffer),
 							.type = STRING,
 					};
 					Consume();
@@ -137,7 +146,7 @@ token_t *Lexer(char* codeFile) {
 
 				if (!foundChar) {
 						Add(){
-							.literal = strdup(buffer),
+							.literal = STRDUP(buffer),
 							.type = INT,
 						};
 						continue;
@@ -148,7 +157,7 @@ token_t *Lexer(char* codeFile) {
 				buffEquals("if", IF);
 				buffEquals("else", ELSE);
 				Add(){
-						.literal = strdup(buffer),
+						.literal = STRDUP(buffer),
 						.type = IDENT,
 				};
 		}
@@ -156,7 +165,13 @@ token_t *Lexer(char* codeFile) {
 				.literal = "EOF",
 				.type = TERMINATE,
 		};
-		return Lex;
+
+		NewLexer->tokens = ArenaPush(NewLexer->arena, (size_t) (LexIdx+1)*sizeof(token_t));
+		assert(NewLexer->tokens!=NULL);
+		memcpy(NewLexer->tokens, Lex, (LexIdx+1)*sizeof(token_t));
+		free(Lex);
+		Lex=NULL;
+		return NewLexer;
 };
 
 static bool isDigit(char* codeFile, int idx) {
@@ -174,3 +189,4 @@ static bool isDigit(char* codeFile, int idx) {
 #undef Consume
 #undef Peek
 #undef PeekIs
+#undef STRDUP
