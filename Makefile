@@ -1,5 +1,5 @@
 SRC=$(wildcard src/*.c) $(wildcard src/parser/*.c)
-TEST=sh tests/tests.sh
+TEST=bash tests/tests.sh
 CFLAGS=-Iinclude
 BUILD_DIR=build/src/parser
 
