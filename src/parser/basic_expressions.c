@@ -14,15 +14,10 @@ identexpr_t* ParseIdentExpr(token_t** Lexer, arena_t* Arena) {
 		identexpr_t* Expr = MALLOC(sizeof(stringexpr_t));
 		if (Expr == NULL) return NULL;
 
-		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
+		Expr->Value = STRDUP(PEEK_LIT());
 		if (Expr->Value == NULL) return NULL;
-		strcat(Expr->Value, PEEK_LIT());
 #ifdef ALLOW_TESTS
-		size_t len = STRLEN(Expr->Value);
-		Expr->testString = MALLOC(len * sizeof(char));
-		if (Expr->testString == NULL) return NULL;
-
-		strcat(Expr->testString, Expr->Value);
+		Expr->testString = Expr->Value;
 #endif
 		CONSUME();
 		return Expr;
@@ -38,7 +33,7 @@ integerexpr_t* ParseIntExpr(token_t** Lexer, arena_t* Arena) {
 		Expr->testString = MALLOC(len * sizeof(char));
 		if (Expr->testString == NULL) return NULL;
 
-		sprintf(Expr->testString, "%s", PEEK_LIT());
+		sprintf(Expr->testString, "%d", Expr->Value);
 #endif
 		CONSUME();
 		return Expr;
@@ -48,9 +43,8 @@ stringexpr_t* ParseStringExpr(token_t** Lexer, arena_t* Arena) {
 		stringexpr_t* Expr = MALLOC(sizeof(stringexpr_t));
 		if (Expr == NULL) return NULL;
 
-		Expr->Value = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char) );
+		Expr->Value = STRDUP(PEEK_LIT());
 		if (Expr->Value == NULL) return NULL;
-		strcat(Expr->Value, PEEK_LIT());
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Expr->Value) + STRLEN("\"")*2;
 		Expr->testString = MALLOC(len * sizeof(char));
@@ -67,9 +61,8 @@ prefixexpr_t *ParsePrefixExpr(token_t** Lexer, arena_t* Arena) {
 		prefixexpr_t *Expr = MALLOC(sizeof(prefixexpr_t));
 		if (Expr == NULL) return NULL;
 
-		Expr->Operator = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
+		Expr->Operator = STRDUP(PEEK_LIT());
 		if (Expr->Operator == NULL) return NULL;
-		strcat(Expr->Operator, PEEK_LIT());
 
 		CONSUME();
 		Expr->RightExpr = ParseExpression(Lexer, Arena, PREFIX_PRIOR);
@@ -89,10 +82,9 @@ infixexpr_t *ParseInfixExpr(token_t** Lexer, arena_t* Arena, expressions_t* left
 		if (Expr == NULL) return NULL;
 
 		Expr->LeftExpr = leftExpr;
-		Expr->Operator = MALLOC(STRLEN(PEEK_LIT()) * sizeof(char));
+		Expr->Operator = STRDUP(PEEK_LIT());
 		if (Expr->Operator == NULL) return NULL;
 
-		strcat(Expr->Operator, PEEK_LIT());
 		operators_priorities_t Priority = GetInfixPriority(PEEK());
 		CONSUME();
 		Expr->RightExpr = ParseExpression(Lexer, Arena, Priority);

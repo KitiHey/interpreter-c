@@ -21,9 +21,9 @@ static void testFunc(char* str, int idx, char* expected, tokenType_t expectedTyp
 		}
 		success(*testNum, "Returned expected '%s'", expected);
 terminate:
-		free(L);
 		L=NULL;
 		(*testNum)++;
+		FREE_LEXER(LexerT);
 }
 
 int main() {

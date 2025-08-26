@@ -2,6 +2,7 @@
 #include "tokens.h"
 #include "test.h"
 #include "arena.h"
+#include "tools.h"
 #include <string.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -16,8 +17,6 @@ static char consume(char* code, int *idx) {
 		return code[ (*idx)++ ];
 }
 static bool isDigit(char* codeFile, int idx);
-static char* Strdup(arena_t* arena, char* str);
-
 
 #define Peek() codeFile[idx]
 #define PeekIs(peekChr) (Peek()==peekChr)
@@ -179,13 +178,6 @@ static bool isDigit(char* codeFile, int idx) {
 		char character = Peek();
 		if (character>='0' && character<='9') return true;
 		return false;
-}
-
-static char* Strdup(arena_t* arena, char* str) {
-		char* newstr = ArenaPush(arena, (size_t) (strlen(str)+1)*sizeof(char));
-		if (newstr == NULL) return NULL;
-		strcat(newstr, str);
-		return newstr;
 }
 
 #undef Add

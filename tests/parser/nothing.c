@@ -11,5 +11,6 @@ int main() {
 		return 1;
 	}
 	success(0, "Nothing is returned!");
+	FREE_LEXER(LexerT);
 	return 0;
 }

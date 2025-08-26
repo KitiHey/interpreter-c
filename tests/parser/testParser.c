@@ -33,6 +33,7 @@ void Test(tests_t testT) {
 		success(*(testT.Idx), "got %s", testT.Expected);
 		*(testT.Idx)+=1;
 		free(P.Arena);
+		FREE_LEXER(LexerT);
 }
 
 int main() {

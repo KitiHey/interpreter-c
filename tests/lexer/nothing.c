@@ -14,5 +14,7 @@ int main() {
 		return 1;
 	}
 	success(0, "nothing in Lexer");
+	L = NULL;
+	FREE_LEXER(LexerT);
 	return 0;
 }

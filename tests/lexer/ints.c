@@ -19,8 +19,8 @@ int testLexer(char* numProvided, char* num, int idx_Lexer, int testNum) {
 			return 1;
 	}
 	success(testNum, "Int lexed into %s", num);
-	free(L);
 	L=NULL;
+	FREE_LEXER(LexerT);
 	return 0;
 }
 
