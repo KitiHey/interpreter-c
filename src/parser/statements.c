@@ -8,9 +8,9 @@
 
 exprstmt_t* ParseExprStmt(token_t** Lexer, arena_t* Arena) {
 		exprstmt_t* Stmt = MALLOC(sizeof(statements_t));
-		if (Stmt == NULL) return NULL;
+		ERROR_IFMALLOC(Stmt);
 		Stmt->Expr = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
-		if (Stmt->Expr == NULL) return NULL;
+		ERROR_IFFROM(Stmt->Expr);
 		SKIPSEMI();
 #ifdef ALLOW_TESTS
 		Stmt->testString = Stmt->Expr->testString;
@@ -20,19 +20,19 @@ exprstmt_t* ParseExprStmt(token_t** Lexer, arena_t* Arena) {
 
 letstmt_t* ParseLetStmt(token_t** Lexer, arena_t* Arena) {
 		letstmt_t* Stmt = MALLOC(sizeof(letstmt_t));
-		if (Stmt == NULL) return NULL;
-		if (PEEK() != IDENT) return NULL;
+		ERROR_IFMALLOC(Stmt);
+		ERROR_IFNEQ(PEEK(), IDENT);
 		Stmt->Ident = ParseIdentExpr(Lexer, Arena);
-		if (Stmt->Ident == NULL) return NULL;
-		if (PEEK() != EQUAL) return NULL;
+		ERROR_IFFROM(Stmt->Ident);
+		ERROR_IFNEQ(PEEK(), EQUAL);
 		CONSUME();
 		Stmt->Expr = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
-		if (Stmt->Expr == NULL) return NULL;
+		ERROR_IFFROM(Stmt->Expr);
 		SKIPSEMI();
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Stmt->Expr->testString)+STRLEN(Stmt->Ident->testString)+strlen("let  = ");
 		Stmt->testString = MALLOC(len*sizeof(char));
-		if (Stmt->testString == NULL) return NULL;
+		ERROR_IFMALLOC(Stmt->testString);
 		sprintf(Stmt->testString, "let %s = %s", Stmt->Ident->testString, Stmt->Expr->testString);
 #endif
 		return Stmt;
@@ -40,13 +40,13 @@ letstmt_t* ParseLetStmt(token_t** Lexer, arena_t* Arena) {
 
 returnstmt_t* ParseReturnStmt(token_t** Lexer, arena_t* Arena) {
 		returnstmt_t* Stmt = MALLOC(sizeof(returnstmt_t));
-		if (Stmt == NULL) { return NULL; }
+		ERROR_IFMALLOC(Stmt);
 		Stmt->Expr = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
-		if (Stmt->Expr == NULL) return NULL;
+		ERROR_IFFROM(Stmt->Expr);
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Stmt->Expr->testString)+strlen("return ");
 		Stmt->testString = MALLOC(len*sizeof(char));
-		if (Stmt->testString == NULL) return NULL;
+		ERROR_IFMALLOC(Stmt->testString);
 		sprintf(Stmt->testString, "return %s", Stmt->Expr->testString);
 #endif
 		SKIPSEMI();
@@ -55,16 +55,16 @@ returnstmt_t* ParseReturnStmt(token_t** Lexer, arena_t* Arena) {
 
 funcstmt_t* ParseFuncStmt(token_t** Lexer, arena_t* Arena) {
 		funcstmt_t* Stmt = MALLOC(sizeof(funcstmt_t));
-		if (Stmt == NULL) return NULL;
-		if (PEEK() != IDENT) return NULL;
+		ERROR_IFMALLOC(Stmt);
+		ERROR_IFNEQ(PEEK(), IDENT);
 		Stmt->Ident = ParseIdentExpr(Lexer, Arena);
-		if (Stmt->Ident == NULL) return NULL;
+		ERROR_IFFROM(Stmt->Ident);
 		Stmt->Expr = ParseFuncExpr(Lexer, Arena);
-		if (Stmt->Expr == NULL) return NULL;
+		ERROR_IFFROM(Stmt->Expr);
 #ifdef ALLOW_TESTS
 		size_t len = STRLEN(Stmt->Expr->testString)+STRLEN(Stmt->Ident->testString);
 		Stmt->testString = MALLOC(len*sizeof(char));
-		if (Stmt->testString == NULL) return NULL;
+		ERROR_IFMALLOC(Stmt->testString);
 		sprintf(Stmt->testString, "func %s%s", Stmt->Ident->testString, Stmt->Expr->testString+5);
 #endif
 
@@ -73,26 +73,25 @@ funcstmt_t* ParseFuncStmt(token_t** Lexer, arena_t* Arena) {
 
 statements_t *ParseStmt(token_t** Lexer, arena_t* Arena) {
 		statements_t* Statement = MALLOC(sizeof(statements_t));
+		ERROR_IFMALLOC(Statement);
 #ifndef ALLOW_TESTS
 #define CASES(stmt, caseNew, function) \
 						Statement->Stmt = stmt; \
 						Statement->caseNew = function(Lexer, Arena); \
-						if (Statement->caseNew == NULL) { return NULL; } \
+						ERROR_IFFROM(Statement->caseNew); \
 						break;
 #else
 #define CASES(stmt, caseNew, function) \
 						Statement->Stmt = stmt; \
 						Statement->caseNew = function(Lexer, Arena); \
-						if (Statement->caseNew == NULL) { return NULL; } \
+						ERROR_IFFROM(Statement->caseNew); \
 						Statement->testString = MALLOC((STRLEN(Statement->caseNew->testString)+strlen(";"))*sizeof(char)); \
-						if (Statement->testString == NULL) { return NULL; } \
+						ERROR_IFMALLOC(Statement->testString); \
 						sprintf(Statement->testString, "%s;", Statement->caseNew->testString); \
 						break;
 #endif
-		if (Statement == NULL) { return NULL; }
+		ERROR_IFEQ(PEEK(), TERMINATE);
 		switch (PEEK()) {
-				case TERMINATE:
-						return NULL;
 				case FUNC:
 						if (PEEK_NEXT() == IDENT) {
 								CONSUME();
