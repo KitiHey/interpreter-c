@@ -9,8 +9,8 @@
 #include "pMacros.h"
 #include "expressions.h"
 
-conditionexpressions_t* ParseMultipleExpr(token_t** Lexer, arena_t* Arena, tokenType_t delimiter) {
-		expressions_t** Buffer = calloc(10, sizeof(expressions_t*));
+multipleexpr_t* ParseMultipleExpr(token_t** Lexer, arena_t* Arena, tokenType_t delimiter, tokenType_t spacing) {
+		expressions_t** Buffer = calloc(10, sizeof(identexpr_t*));
 		ERROR_IFMALLOC(Buffer);
 #ifdef ALLOW_TESTS
 		char* TestString = calloc(10,  sizeof(char));
@@ -23,13 +23,38 @@ conditionexpressions_t* ParseMultipleExpr(token_t** Lexer, arena_t* Arena, token
 		for (idx = 0; PEEK() != delimiter && PEEK() != TERMINATE; idx++) {
 				if (idx >= cap) {
 						cap *= 2;
-						Buffer = realloc(Buffer, cap*sizeof(expressions_t*));
+						Buffer = realloc(Buffer, cap*sizeof(identexpr_t*));
 						ERROR_IFMALLOC(Buffer);
 				}
-				Buffer[idx] = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
-				ERROR_IFFROM(Buffer[idx]);
+				if (PEEK() != IDENT) {
+						free(Buffer);
 #ifdef ALLOW_TESTS
-				idxString += strlen(Buffer[idx]->testString)+1;
+						free(TestString);
+#endif
+						ERROR_NEQ("Ident");
+						return NULL;
+				}
+				Buffer[idx] = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
+				if ( (PEEK() != spacing && PEEK() != delimiter) || Buffer[idx] == NULL) {
+						free(Buffer);
+#ifdef ALLOW_TESTS
+						free(TestString);
+#endif
+						ERROR_IFFROM(Buffer[idx]);
+						ERROR_NEQ("Spacing or Delimiter");
+						return NULL;
+				}
+				if (PEEK() == spacing) {
+						CONSUME();
+				}
+#ifdef ALLOW_TESTS
+				char spaces[3];
+				if (idxString>0) {
+						strcpy(spaces, ", ");
+				} else {
+						strcpy(spaces, "");
+				}
+				idxString += STRLEN(Buffer[idx]->testString)+strlen(spaces);
 				if (idxString >= capString) {
 						while (idxString >= capString) {
 								capString *= 2;
@@ -37,11 +62,11 @@ conditionexpressions_t* ParseMultipleExpr(token_t** Lexer, arena_t* Arena, token
 						TestString = realloc(TestString, capString * sizeof(char));
 						ERROR_IFMALLOC(TestString);
 				}
-				strcat(TestString, Buffer[idx]->testString);
+				sprintf(TestString, "%s%s%s", TestString, spaces, Buffer[idx]->testString);
 #endif
 		}
 		ERROR_IFEQ(PEEK(), TERMINATE);
-		conditionexpressions_t* Expr = MALLOC(sizeof(conditionexpressions_t));
+		multipleexpr_t* Expr = MALLOC(sizeof(multipleexpr_t));
 		ERROR_IFMALLOC(Expr);
 		Expr->Expressions = MALLOC((idx+1)*sizeof(expressions_t*));
 		ERROR_IFMALLOC(Expr->Expressions);
@@ -61,6 +86,7 @@ conditionexpressions_t* ParseMultipleExpr(token_t** Lexer, arena_t* Arena, token
 #endif
 
 		return Expr;
+
 }
 
 identsexpressions_t* ParseMultipleIdents(token_t** Lexer, arena_t* Arena, tokenType_t delimiter, tokenType_t spacing) {
@@ -143,6 +169,28 @@ identsexpressions_t* ParseMultipleIdents(token_t** Lexer, arena_t* Arena, tokenT
 
 }
 
+callfexpr_t* ParseCallFExpr(token_t** Lexer, arena_t* Arena) {
+		callfexpr_t* Expr = MALLOC(sizeof(callfexpr_t));
+
+		Expr->Value = ParseIdentExpr(Lexer, Arena);
+		ERROR_IFFROM(Expr->Value);
+
+		ERROR_IFNEQ(PEEK(), L_PARENT);
+		CONSUME();
+
+		Expr->Arguments = ParseMultipleExpr(Lexer, Arena, R_PARENT, COMMA);
+		ERROR_IFFROM(Expr->Arguments);
+
+		ERROR_IFNEQ(PEEK(), R_PARENT);
+		CONSUME();
+#ifdef ALLOW_TESTS
+		size_t len = STRLEN(Expr->Value->testString) + STRLEN(Expr->Arguments->testString) + strlen("()");
+		Expr->testString = MALLOC(len*sizeof(char));
+		sprintf(Expr->testString, "%s(%s)", Expr->Value->testString, Expr->Arguments->testString);
+#endif
+		return Expr;
+}
+
 funcexpr_t* ParseFuncExpr(token_t** Lexer, arena_t* Arena) {
 		if (PEEK() == FUNC) {
 				CONSUME();
@@ -177,7 +225,7 @@ ifexpr_t* ParseIfExpr(token_t** Lexer, arena_t* Arena) {
 		ERROR_IFNEQ(PEEK(), L_PARENT);
 		CONSUME();
 
-		Expr->Condition = ParseMultipleExpr(Lexer, Arena, R_PARENT);
+		Expr->Condition = ParseExpression(Lexer, Arena, LOWEST_PRIOR);
 		ERROR_IFFROM(Expr->Condition);
 
 		ERROR_IFNEQ(PEEK(), R_PARENT);
@@ -278,6 +326,15 @@ expressions_t* ParseExpression(token_t** Lexer, arena_t* Arena, operators_priori
 #endif
 						break;
 				case IDENT:
+						if (PEEK_NEXT() == L_PARENT) {
+								Expression->Expr = CALLF_EXPR;
+								Expression->callfExpr = ParseCallFExpr(Lexer, Arena);
+								ERROR_IFFROM(Expression->callfExpr);
+#ifdef ALLOW_TESTS
+								Expression->testString = Expression->callfExpr->testString;
+#endif
+								break;
+						}
 						Expression->Expr = IDENT_EXPR;
 						Expression->identExpr = ParseIdentExpr(Lexer, Arena);
 						ERROR_IFFROM(Expression->identExpr);
