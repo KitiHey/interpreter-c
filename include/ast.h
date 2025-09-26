@@ -23,6 +23,7 @@ typedef enum ExpressionsTypes {
 	INTEGER_EXPR,
 	IF_EXPR,
 	IDENT_EXPR,
+	CALLF_EXPR,
 } expressionsTypes_t;
 
 typedef enum OperatorsPriorities {
@@ -33,10 +34,10 @@ typedef enum OperatorsPriorities {
 	HIGHEST_PRIOR,
 } operators_priorities_t;
 
-typedef struct ConditionExpressions {
+typedef struct MultipleExpr {
 	expressions_t** Expressions;
 	TESTSTRING
-} conditionexpressions_t;
+} multipleexpr_t;
 
 typedef struct IdentsExpressions {
 	identexpr_t** Idents;
@@ -46,7 +47,7 @@ typedef struct IdentsExpressions {
 typedef struct IfExpr {
 	stmts_t* Consequence;
 	stmts_t* Alternative;
-	conditionexpressions_t* Condition;
+	expressions_t* Condition;
 	TESTSTRING
 } ifexpr_t;
 
@@ -84,6 +85,12 @@ typedef struct IntegerExpr {
 	TESTSTRING
 } integerexpr_t;
 
+typedef struct CallFExpr {
+	identexpr_t* Value;
+	multipleexpr_t* Arguments;
+	TESTSTRING
+} callfexpr_t;
+
 typedef struct Expressions {
 	union {
 			ifexpr_t *ifExpr;
@@ -93,6 +100,7 @@ typedef struct Expressions {
 			funcexpr_t *funcExpr;
 			stringexpr_t *stringExpr;
 			identexpr_t *identExpr;
+			callfexpr_t *callfExpr;
 	};
 	expressionsTypes_t Expr;
 	TESTSTRING

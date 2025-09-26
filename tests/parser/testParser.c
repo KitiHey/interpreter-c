@@ -103,5 +103,12 @@ int main() {
 	TEST_(Input: "a!=b", Expected: "(a!=b);")
 	TEST_(Input: "a+49!=b*4", Expected: "((a+49)!=(b*4));")
 	TEST_(Input: "if(1+1==2) { return \"Hello World!\"; }", Expected: "if (((1+1)==2)) { return \"Hello World!\"; };")
+	TEST_(Input: "a+59==b", Expected: "((a+59)==b);")
+	TEST_(Input: "a==b+59", Expected: "(a==(b+59));")
+// Funcs
+	TEST_(Input: "a()", Expected: "a();")
+	TEST_(Input: "a(b)", Expected: "a(b);")
+	TEST_(Input: "a(b+5,n+s)", Expected: "a((b+5), (n+s));")
+	TEST_(Input: "abc(b+5,n+s)", Expected: "abc((b+5), (n+s));")
 	return 0;
 }
